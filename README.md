@@ -27,7 +27,7 @@ Creates a .zip file in /dist.
 
 ### grunt watch
 Watches for changes in HTML, CSS and JS files.
-When files changr, copies new files to /build directory, minifies them into /dist directory and creates a new .zip archive.
+When files change, copies new files to /build directory, minifies them into /dist directory and creates a new .zip archive.
 
 ### grunt develop
 Runs 'dist', 'server' and 'watch' tasks.
