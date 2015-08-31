@@ -15,8 +15,17 @@ module.exports = function(grunt) {
                     collapseWhitespace: true
                 },
                 files: {
-                    "build/index.html": "src/index.html"
+                    "dist/index.html": "build/index.html"
                 }
+            }
+        },
+
+        uglify: {
+            dist: {
+                src: [
+                    "build/<%= pkg.name %>.js"
+                ],
+                dest: "dist/<%= pkg.name %>.js"
             }
         },
 
@@ -27,39 +36,65 @@ module.exports = function(grunt) {
             },
             target: {
                 files: {
-                    "build/style.css": "src/css/style.css"
+                    "dist/style.css": "build/style.css"
                 }
             }
         },
 
-        uglify: {
-            build: {
+        copy: {
+            "build-html": {
+                src: "src/index.html",
+                dest: "build/index.html"
+            },
+            "build-css": {
+                src: "src/css/style.css",
+                dest: "build/style.css"
+            }
+        },
+
+        concat: {
+            options: {
+                // separator: ";",
+            },
+            "build-js": {
                 src: [
                     "src/js/index.js",
                     "src/js/pacman.js"
                 ],
-                dest: "build/<%= pkg.name %>.js"
-            }
+                dest: "build/<%= pkg.name %>.js",
+            },
         },
 
         watch: {
             js: {
                 files: ["src/js/*.js"],
-                tasks: ["uglify", "compress"],
+                tasks: [
+                    "concat:build-js",
+                    "uglify",
+                    "compress:dist"
+                ],
                 options: {
                     spawn: false,
                 }
             },
             css: {
                 files: ["src/css/*.css"],
-                tasks: ["cssmin", "compress"],
+                tasks: [
+                    "copy:build-css",
+                    "cssmin",
+                    "compress:dist"
+                ],
                 options: {
                     spawn: false,
                 }
             },
             html: {
                 files: ["src/index.html"],
-                tasks: ["htmlmin", "compress"],
+                tasks: [
+                    "copy:build-html",
+                    "htmlmin",
+                    "compress:dist"
+                ],
                 options: {
                     spawn: false,
                 }
@@ -76,15 +111,15 @@ module.exports = function(grunt) {
         },
 
         compress: {
-            main: {
+            dist: {
                 options: {
-                    archive: "build/<%= pkg.name %>.zip",
+                    archive: "dist/<%= pkg.name %>.zip",
                     pretty: true
                 },
                 src: [
-                    "build/index.html",
-                    "build/ghosts.js",
-                    "build/style.css"
+                    "dist/index.html",
+                    "dist/ghosts.js",
+                    "dist/style.css"
                 ]
             }
         }
@@ -96,14 +131,21 @@ module.exports = function(grunt) {
     ]);
 
     grunt.registerTask("build", [
+        "copy:build-html",
+        "copy:build-css",
+        "concat:build-js"
+    ]);
+
+    grunt.registerTask("dist", [
+        "build",
         "htmlmin",
-        "cssmin",
         "uglify",
+        "cssmin",
         "compress"
     ]);
 
     grunt.registerTask("develop", [
-        "build",
+        "dist",
         "server",
         "watch"
     ]);

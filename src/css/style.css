@@ -1,5 +1,7 @@
-.game {
+#game {
+    margin: 50px auto 0;
+    display: block;
+    border: 3px solid #aaa;
+    width: 600px;
     height: 400px;
-    width: 400px;
-    border: 1px solid #00000;
 }
