@@ -1,25 +1,22 @@
-/*globals module*/
+/*globals module, require*/
 
 module.exports = function(grunt) {
     "use strict";
 
-    grunt.loadNpmTasks("grunt-contrib-uglify");
-    grunt.loadNpmTasks("grunt-contrib-htmlmin");
-    grunt.loadNpmTasks("grunt-contrib-cssmin");
-    grunt.loadNpmTasks("grunt-contrib-connect");
+    require("load-grunt-tasks")(grunt);
 
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
 
         htmlmin: {
             dist: {
-              options: {
-                removeComments: true,
-                collapseWhitespace: true
-              },
-              files: {
-                "build/index.html": "src/index.html"
-              }
+                options: {
+                    removeComments: true,
+                    collapseWhitespace: true
+                },
+                files: {
+                    "build/index.html": "src/index.html"
+                }
             }
         },
 
@@ -30,7 +27,7 @@ module.exports = function(grunt) {
             },
             target: {
                 files: {
-                    "build/style.min.css": "src/css/style.css"
+                    "build/style.css": "src/css/style.css"
                 }
             }
         },
@@ -41,17 +38,54 @@ module.exports = function(grunt) {
                     "src/js/index.js",
                     "src/js/pacman.js"
                 ],
-                dest: "build/<%= pkg.name %>.min.js"
+                dest: "build/<%= pkg.name %>.js"
+            }
+        },
+
+        watch: {
+            js: {
+                files: ["src/js/*.js"],
+                tasks: ["uglify", "compress"],
+                options: {
+                    spawn: false,
+                }
+            },
+            css: {
+                files: ["src/css/*.css"],
+                tasks: ["cssmin", "compress"],
+                options: {
+                    spawn: false,
+                }
+            },
+            html: {
+                files: ["src/index.html"],
+                tasks: ["htmlmin", "compress"],
+                options: {
+                    spawn: false,
+                }
             }
         },
 
         connect: {
             server: {
-              options: {
-                port: 8000,
-                base: "build",
-                keepalive: true
-              }
+                options: {
+                    port: 8000,
+                    base: "build"
+                }
+            }
+        },
+
+        compress: {
+            main: {
+                options: {
+                    archive: "build/<%= pkg.name %>.zip",
+                    pretty: true
+                },
+                src: [
+                    "build/index.html",
+                    "build/ghosts.js",
+                    "build/style.css"
+                ]
             }
         }
     });
@@ -64,13 +98,18 @@ module.exports = function(grunt) {
     grunt.registerTask("build", [
         "htmlmin",
         "cssmin",
-        "uglify"
+        "uglify",
+        "compress"
     ]);
 
+    grunt.registerTask("develop", [
+        "build",
+        "server",
+        "watch"
+    ]);
 
     grunt.registerTask("default", [
-        "build",
-        "server"
+        "develop"
     ]);
 
 };

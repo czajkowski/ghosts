@@ -1,3 +1,3 @@
 function index(foo, bar) {
-    console.log(foo, bar);
+    console.log(foo, bar, 123);
 }
