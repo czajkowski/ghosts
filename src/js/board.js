@@ -1,92 +1,58 @@
 /* jshint ignore:start */
-function Board (canvas) {
-    var areaSize = 24,
-        canvasContext = canvas.getContext('2d'),
+function Board (config, canvas) {
 
-        // Directions
-        // 0 - top
-        // 1 - right
-        // 2 - down
-        // 3 - left
-        pacman = {
-            color : '#FE0',
-            x : 14,
-            y : 23,
-            direction: 3
-        }
-        // red ghost
-        blinky = {
-            color : '#F00',
-            x : 14,
-            y : 11,
-            direction: 0
-        },
-        // pink ghost
-        pinky = {
-            color : '#F99',
-            x : 14,
-            y : 13,
-            direction: 1
-        },
-        // blue ghost
-        inky = {
-            color : '#6FF',
-            x : 12,
-            y : 13,
-            direction: 2
-        },
-        // yellow ghost
-        clyde = {
-            color : '#4AC',
-            x : 16,
-            y : 13,
-            direction: 3
-        },
+    //#########################################################################
+    // VARIABLES
+    //#########################################################################
 
-        // 0 - empty road
-        // 1 - portal
-        // 3 - dot
-        // 4 - big dot
-        // 8 - door
-        // 9 - wall
-        map = [
-            [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-            [9,3,3,3,3,3,3,3,3,3,3,3,3,9,9,3,3,3,3,3,3,3,3,3,3,3,3,9],
-            [9,3,9,9,9,9,3,9,9,9,9,9,3,9,9,3,9,9,9,9,9,3,9,9,9,9,3,9],
-            [9,4,9,9,9,9,3,9,9,9,9,9,3,9,9,3,9,9,9,9,9,3,9,9,9,9,4,9],
-            [9,3,9,9,9,9,3,9,9,9,9,9,3,9,9,3,9,9,9,9,9,3,9,9,9,9,3,9],
-            [9,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,9],
-            [9,3,9,9,9,9,3,9,9,3,9,9,9,9,9,9,9,9,3,9,9,3,9,9,9,9,3,9],
-            [9,3,9,9,9,9,3,9,9,3,9,9,9,9,9,9,9,9,3,9,9,3,9,9,9,9,3,9],
-            [9,3,3,3,3,3,3,9,9,3,3,3,3,9,9,3,3,3,3,9,9,3,3,3,3,3,3,9],
-            [9,9,9,9,9,9,3,9,9,9,9,9,0,9,9,0,9,9,9,9,9,3,9,9,9,9,9,9],
-            [9,9,9,9,9,9,3,9,9,9,9,9,0,9,9,0,9,9,9,9,9,3,9,9,9,9,9,9],
-            [9,0,0,0,9,9,3,9,9,0,0,0,0,0,0,0,0,0,0,9,9,3,9,9,0,0,0,9],
-            [9,9,9,9,9,9,3,9,9,0,9,9,9,8,8,9,9,9,0,9,9,3,9,9,9,9,9,9],
-            [9,9,9,9,9,9,3,9,9,0,9,0,0,0,0,0,0,9,0,9,9,3,9,9,9,9,9,9],
-            [1,0,0,0,0,0,3,0,0,0,9,0,0,0,0,0,0,9,0,0,0,3,0,0,0,0,0,1],
-            [9,9,9,9,9,9,3,9,9,0,9,0,0,0,0,0,0,9,0,9,9,3,9,9,9,9,9,9],
-            [9,9,9,9,9,9,3,9,9,0,9,9,9,9,9,9,9,9,0,9,9,3,9,9,9,9,9,9],
-            [9,0,0,0,9,9,3,9,9,0,0,0,0,0,0,0,0,0,0,9,9,3,9,9,0,0,0,9],
-            [9,9,9,9,9,9,3,9,9,0,9,9,9,9,9,9,9,9,0,9,9,3,9,9,9,9,9,9],
-            [9,9,9,9,9,9,3,9,9,0,9,9,9,9,9,9,9,9,0,9,9,3,9,9,9,9,9,9],
-            [9,3,3,3,3,3,3,3,3,3,3,3,3,9,9,3,3,3,3,3,3,3,3,3,3,3,3,9],
-            [9,3,9,9,9,9,3,9,9,9,9,9,3,9,9,3,9,9,9,9,9,3,9,9,9,9,3,9],
-            [9,3,9,9,9,9,3,9,9,9,9,9,3,9,9,3,9,9,9,9,9,3,9,9,9,9,3,9],
-            [9,4,3,3,9,9,3,3,3,3,3,3,3,0,0,3,3,3,3,3,3,3,9,9,3,3,4,9],
-            [9,9,9,3,9,9,3,9,9,3,9,9,9,9,9,9,9,9,3,9,9,3,9,9,3,9,9,9],
-            [9,9,9,3,9,9,3,9,9,3,9,9,9,9,9,9,9,9,3,9,9,3,9,9,3,9,9,9],
-            [9,3,3,3,3,3,3,9,9,3,3,3,3,9,9,3,3,3,3,9,9,3,3,3,3,3,3,9],
-            [9,3,9,9,9,9,9,9,9,9,9,9,3,9,9,3,9,9,9,9,9,9,9,9,9,9,3,9],
-            [9,3,9,9,9,9,9,9,9,9,9,9,3,9,9,3,9,9,9,9,9,9,9,9,9,9,3,9],
-            [9,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,9],
-            [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-        ],
-        mapCols = map[0].length,
-        mapRows = map.length;
+    var areaSize = config.areaSize,
+        canvasContext = canvas.getContext('2d');
 
-    canvas.width = areaSize * mapCols;
-    canvas.height = areaSize * mapRows;
+    //#########################################################################
+    // PROPERTIES
+    //#########################################################################
+
+    // 0 - empty road
+    // 1 - portal
+    // 3 - dot
+    // 4 - big dot
+    // 8 - door
+    // 9 - wall
+    this.map = [
+        [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+        [9,3,3,3,3,3,3,3,3,3,3,3,3,9,9,3,3,3,3,3,3,3,3,3,3,3,3,9],
+        [9,3,9,9,9,9,3,9,9,9,9,9,3,9,9,3,9,9,9,9,9,3,9,9,9,9,3,9],
+        [9,4,9,9,9,9,3,9,9,9,9,9,3,9,9,3,9,9,9,9,9,3,9,9,9,9,4,9],
+        [9,3,9,9,9,9,3,9,9,9,9,9,3,9,9,3,9,9,9,9,9,3,9,9,9,9,3,9],
+        [9,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,9],
+        [9,3,9,9,9,9,3,9,9,3,9,9,9,9,9,9,9,9,3,9,9,3,9,9,9,9,3,9],
+        [9,3,9,9,9,9,3,9,9,3,9,9,9,9,9,9,9,9,3,9,9,3,9,9,9,9,3,9],
+        [9,3,3,3,3,3,3,9,9,3,3,3,3,9,9,3,3,3,3,9,9,3,3,3,3,3,3,9],
+        [9,9,9,9,9,9,3,9,9,9,9,9,0,9,9,0,9,9,9,9,9,3,9,9,9,9,9,9],
+        [9,9,9,9,9,9,3,9,9,9,9,9,0,9,9,0,9,9,9,9,9,3,9,9,9,9,9,9],
+        [9,0,0,0,9,9,3,9,9,0,0,0,0,0,0,0,0,0,0,9,9,3,9,9,0,0,0,9],
+        [9,9,9,9,9,9,3,9,9,0,9,9,9,8,8,9,9,9,0,9,9,3,9,9,9,9,9,9],
+        [9,9,9,9,9,9,3,9,9,0,9,0,0,0,0,0,0,9,0,9,9,3,9,9,9,9,9,9],
+        [1,0,0,0,0,0,3,0,0,0,9,0,0,0,0,0,0,9,0,0,0,3,0,0,0,0,0,1],
+        [9,9,9,9,9,9,3,9,9,0,9,0,0,0,0,0,0,9,0,9,9,3,9,9,9,9,9,9],
+        [9,9,9,9,9,9,3,9,9,0,9,9,9,9,9,9,9,9,0,9,9,3,9,9,9,9,9,9],
+        [9,0,0,0,9,9,3,9,9,0,0,0,0,0,0,0,0,0,0,9,9,3,9,9,0,0,0,9],
+        [9,9,9,9,9,9,3,9,9,0,9,9,9,9,9,9,9,9,0,9,9,3,9,9,9,9,9,9],
+        [9,9,9,9,9,9,3,9,9,0,9,9,9,9,9,9,9,9,0,9,9,3,9,9,9,9,9,9],
+        [9,3,3,3,3,3,3,3,3,3,3,3,3,9,9,3,3,3,3,3,3,3,3,3,3,3,3,9],
+        [9,3,9,9,9,9,3,9,9,9,9,9,3,9,9,3,9,9,9,9,9,3,9,9,9,9,3,9],
+        [9,3,9,9,9,9,3,9,9,9,9,9,3,9,9,3,9,9,9,9,9,3,9,9,9,9,3,9],
+        [9,4,3,3,9,9,3,3,3,3,3,3,3,0,0,3,3,3,3,3,3,3,9,9,3,3,4,9],
+        [9,9,9,3,9,9,3,9,9,3,9,9,9,9,9,9,9,9,3,9,9,3,9,9,3,9,9,9],
+        [9,9,9,3,9,9,3,9,9,3,9,9,9,9,9,9,9,9,3,9,9,3,9,9,3,9,9,9],
+        [9,3,3,3,3,3,3,9,9,3,3,3,3,9,9,3,3,3,3,9,9,3,3,3,3,3,3,9],
+        [9,3,9,9,9,9,9,9,9,9,9,9,3,9,9,3,9,9,9,9,9,9,9,9,9,9,3,9],
+        [9,3,9,9,9,9,9,9,9,9,9,9,3,9,9,3,9,9,9,9,9,9,9,9,9,9,3,9],
+        [9,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,9],
+        [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
+    ];
+    this.cols = this.map[0].length;
+    this.rows = this.map.length;
 
     //#########################################################################
     // FUNCTIONS
@@ -141,16 +107,16 @@ function Board (canvas) {
     }
 
     // col, row - coordinates,
-    function drawArea (col, row) {
+    this.drawArea = function (col, row) {
         var top, right, bottom, left;
 
         // check if coresponding elements are solid
-        top = row == 0 ? 0 : map[row - 1][col] > 7;
-        right = col == mapCols - 1 ? 0 : map[row][col + 1] > 7;
-        bottom = row == mapRows - 1 ? 0 : map[row + 1][col] > 7;
-        left = col == 0 ? 0 : map[row][col - 1] > 7;
+        top = row == 0 ? 0 : this.map[row - 1][col] > 7;
+        right = col == this.cols - 1 ? 0 : this.map[row][col + 1] > 7;
+        bottom = row == this.rows - 1 ? 0 : this.map[row + 1][col] > 7;
+        left = col == 0 ? 0 : this.map[row][col - 1] > 7;
 
-        switch (map[row][col]) {
+        switch (this.map[row][col]) {
             case 9 :
                 // wall
                 drawSolid(col, row, top, right, bottom, left);
@@ -170,106 +136,22 @@ function Board (canvas) {
         }
     }
 
-    function drawGhost (character) {
-        var x = character.x * areaSize,
-            y = character.y * areaSize + areaSize / 2,
-            // 0 - top
-            // 1 - right
-            // 2 - down
-            // 3 - left
-            horizontalPositioner = [0, 1, 0, -1],
-            verticalPositioner = [-1, 0, 1, 0];
+    //#########################################################################
+    // METHODS
+    //#########################################################################
 
-        // character
-        canvasContext.fillStyle = character.color;
-        canvasContext.beginPath();
-        canvasContext.lineTo(x + areaSize / 2, y + areaSize / 2);
-        canvasContext.lineTo(x + (areaSize / 6) * 2, y + (areaSize / 6) * 2);
-        canvasContext.lineTo(x + (areaSize / 6), y + areaSize / 2);
-        canvasContext.lineTo(x, y + (areaSize / 6) * 2);
-        canvasContext.lineTo(x - (areaSize / 6), y + areaSize / 2);
-        canvasContext.lineTo(x - (areaSize / 6) * 2, y + (areaSize / 6) * 2);
-        canvasContext.lineTo(x - areaSize / 2, y + areaSize / 2);
-        canvasContext.lineTo(x - areaSize / 2, y);
-        canvasContext.arc(x, y, areaSize / 2, -Math.PI, 0);
-        canvasContext.closePath();
-        canvasContext.fill();
-
-        // Eyes
-        canvasContext.fillStyle = '#FFF';
-        canvasContext.beginPath();
-        canvasContext.arc(x - areaSize / 4.5, y - areaSize / 8, areaSize / 6, 0 ,2*Math.PI);
-        canvasContext.closePath();
-        canvasContext.fill();
-
-        canvasContext.beginPath();
-        canvasContext.arc(x + areaSize / 4.5, y - areaSize / 8, areaSize / 6, 0 ,2*Math.PI);
-        canvasContext.closePath();
-        canvasContext.fill();
-
-        // Pupils
-        canvasContext.fillStyle = '#00F';
-        canvasContext.beginPath();
-        canvasContext.arc(
-            x - areaSize / 4.5 + (horizontalPositioner[character.direction] * areaSize / 13.5),
-            y - areaSize / 8 + (verticalPositioner[character.direction] * areaSize / 13.5),
-            areaSize / 10,
-            0,
-            2 * Math.PI
-        );
-        canvasContext.closePath();
-        canvasContext.fill();
-
-        canvasContext.beginPath();
-        canvasContext.arc(
-            x + areaSize / 4.5 + (horizontalPositioner[character.direction] * areaSize / 13.5),
-            y - areaSize / 8 + (verticalPositioner[character.direction] * areaSize / 13.5),
-            areaSize / 10,
-            0,
-            2 * Math.PI
-        );
-        canvasContext.closePath();
-        canvasContext.fill();
-    }
-
-    function drawPacman (character) {
-        var x = character.x * areaSize,
-            y = character.y * areaSize + areaSize / 2,
-            r = Math.PI / 2 * character.direction,
-            s = 0.2 * Math.PI;
-
-
-
-        canvasContext.fillStyle = character.color;
-        canvasContext.beginPath();
-        canvasContext.arc(x, y, areaSize / 2, -Math.PI / 2 + s + r, -Math.PI / 2 - s + r);
-        canvasContext.lineTo(x, y);
-        canvasContext.closePath();
-        canvasContext.fill();
-    }
-
-    function drawMap() {
+    this.draw = function() {
         var col, row;
 
         canvasContext.fillStyle = '#000';
-        canvasContext.fillRect(0, 0, mapCols * areaSize, mapRows * areaSize);
+        canvasContext.fillRect(0, 0, this.cols * areaSize, this.rows * areaSize);
 
-        for (col = 0; col < mapCols; col++) {
-            for (row = 0; row < mapRows; row++) {
-                drawArea(col, row);
+        for (col = 0; col < this.cols; col++) {
+            for (row = 0; row < this.rows; row++) {
+                this.drawArea(col, row);
             }
         }
     }
 
-    //#########################################################################
-    // INIT
-    //#########################################################################
 
-    drawMap();
-    drawGhost(blinky);
-    drawGhost(inky);
-    drawGhost(pinky);
-    drawGhost(inky);
-    drawGhost(clyde);
-    drawPacman(pacman);
 }
