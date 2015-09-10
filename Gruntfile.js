@@ -58,8 +58,9 @@ module.exports = function(grunt) {
             },
             "build-js": {
                 src: [
+                    "src/js/board.js",
+                    "src/js/pacman.js",
                     "src/js/index.js",
-                    "src/js/pacman.js"
                 ],
                 dest: "build/<%= pkg.name %>.js",
             },

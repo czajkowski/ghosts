@@ -1,3 +1,7 @@
-function index(foo, bar) {
-    console.log(foo, bar, 123);
+/* jshint ignore:start */
+function Game () {
+    var canvas = document.querySelector('canvas'),
+        board = new Board (canvas);
 }
+
+new Game();
