@@ -1,20 +1,20 @@
 /* jshint ignore:start */
-function Ghost (config, canvas, startX, startY, color, board) {
+function Ghost (gameConfig, characterConfig) {
 
     //#########################################################################
     // VARIABLES
     //#########################################################################
 
-    var areaSize = config.areaSize,
-        canvasContext = canvas.getContext('2d');
+    var areaSize = gameConfig.areaSize,
+        canvasContext = gameConfig.canvasContext;
 
     //#########################################################################
     // PROPERTIES
     //#########################################################################
 
-    this.color = color;
-    this.x = startX;
-    this.y = startY;
+    this.color = characterConfig.color;
+    this.x = characterConfig.x;
+    this.y = characterConfig.y;
 
     // Directions
     // 0 - top

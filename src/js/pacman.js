@@ -1,20 +1,20 @@
 /* jshint ignore:start */
-function Pacman (config, canvas, startX, startY, board) {
+function Pacman (gameConfig, characterConfig) {
 
     //#########################################################################
     // VARIABLES
     //#########################################################################
 
-    var areaSize = config.areaSize,
-        canvasContext = canvas.getContext('2d');
+    var areaSize = gameConfig.areaSize,
+        canvasContext = gameConfig.canvasContext;
 
     //#########################################################################
     // PROPERTIES
     //#########################################################################
 
     this.color = '#FE0';
-    this.x = startX;
-    this.y = startY;
+    this.x = characterConfig.x;
+    this.y = characterConfig.y;
 
     // Directions
     // 0 - top

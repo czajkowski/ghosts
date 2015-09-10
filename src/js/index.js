@@ -1,15 +1,34 @@
 /* jshint ignore:start */
 function Game () {
-    var config = {
-            areaSize : 24
+    var canvas = document.querySelector('canvas'),
+        config = {
+            areaSize : 26,
+            canvasContext : canvas.getContext('2d')
         },
-        canvas = document.querySelector('canvas'),
-        board = new Board(config, canvas),
-        pacman = new Pacman(config, canvas, 14, 23, board),
-        blinky = new Ghost(config, canvas, 14, 11, '#F00', board),
-        pinky = new Ghost(config, canvas, 14, 13, '#F99', board),
-        inky = new Ghost(config, canvas, 12, 13, '#6FF', board),
-        clyde = new Ghost(config, canvas, 16, 13, '#FA0', board);
+
+        board = new Board(config),
+
+        pacman = new Pacman(
+            config,
+            { x :14, y : 23 },
+            board
+        ),
+
+        blinky = new Ghost(
+            config,
+            { x :14, y : 11, color : '#F00' }
+        ),
+        pinky = new Ghost(
+            config,
+            { x : 14, y : 13, color : '#F99' }
+        ),
+        inky = new Ghost(
+            config,
+            { x : 12, y : 13, color : '#6FF' }
+        ),
+        clyde = new Ghost(
+            config, { x : 16, y : 13, color : '#FA0' }
+        );
 
         canvas.width = config.areaSize * board.cols;
         canvas.height = config.areaSize * board.rows;

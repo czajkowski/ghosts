@@ -1,12 +1,12 @@
 /* jshint ignore:start */
-function Board (config, canvas) {
+function Board (gameConfig) {
 
     //#########################################################################
     // VARIABLES
     //#########################################################################
 
-    var areaSize = config.areaSize,
-        canvasContext = canvas.getContext('2d');
+    var areaSize = gameConfig.areaSize,
+        canvasContext = gameConfig.canvasContext;
 
     //#########################################################################
     // PROPERTIES
