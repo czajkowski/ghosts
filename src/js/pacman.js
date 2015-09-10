@@ -21,14 +21,16 @@ function Pacman (gameConfig, characterConfig) {
     // 1 - right
     // 2 - down
     // 3 - left
-    this.direction = 1;
+    this.direction = 1,
+
+    this.route = [1, 0, 0, 0, 1];
 
     //#########################################################################
     // METHODS
     //#########################################################################
 
     this.draw = function () {
-        var x = this.x * areaSize,
+        var x = this.x * areaSize + areaSize / 2,
             y = this.y * areaSize + areaSize / 2,
             r = Math.PI / 2 * this.direction,
             s = 0.2 * Math.PI;
@@ -39,5 +41,23 @@ function Pacman (gameConfig, characterConfig) {
         canvasContext.lineTo(x, y);
         canvasContext.closePath();
         canvasContext.fill();
+    };
+
+    this.move = function () {
+        this.direction = this.route.shift();
+
+        switch (this.direction) {
+            case 0 :
+                this.y--;
+                break;
+            case 1 :
+                this.x++;
+                break;
+            case 2 :
+                this.y++;
+                break;
+            case 3 :
+                this.x++;
+        }
     }
 }

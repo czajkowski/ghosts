@@ -106,9 +106,29 @@ function Board (gameConfig) {
         canvasContext.fill();
     }
 
+
+    //#########################################################################
+    // METHODS
+    //#########################################################################
+
+    this.forEachArea = function (fn) {
+        var col, row;
+
+        for (col = 0; col < this.cols; col++) {
+            for (row = 0; row < this.rows; row++) {
+                fn(col, row);
+            }
+        }
+    }
+
+
     // col, row - coordinates,
     this.drawArea = function (col, row) {
         var top, right, bottom, left;
+
+        // clear area
+        canvasContext.fillStyle = '#000';
+        canvasContext.fillRect(col * areaSize, row * areaSize, areaSize, areaSize);
 
         // check if coresponding elements are solid
         top = row == 0 ? 0 : this.map[row - 1][col] > 7;
@@ -134,24 +154,40 @@ function Board (gameConfig) {
                 drawDot(col, row, 1);
                 break;
         }
-    }
+    };
 
-    //#########################################################################
-    // METHODS
-    //#########################################################################
+    this.drawSurrounding = function (col, row) {
+        var tmpC = [col], tmpR = [row], c, r;
 
-    this.draw = function() {
-        var col, row;
+        col > 0 && tmpC.push(col - 1);
+        col < this.cols - 1 && tmpC.push(col + 1);
 
-        canvasContext.fillStyle = '#000';
-        canvasContext.fillRect(0, 0, this.cols * areaSize, this.rows * areaSize);
+        row > 0 && tmpR.push(row - 1);
+        row < this.rows - 1 && tmpR.push(row + 1);
 
-        for (col = 0; col < this.cols; col++) {
-            for (row = 0; row < this.rows; row++) {
-                this.drawArea(col, row);
+        for (c = 0; c < tmpC.length; c++) {
+            for (r = 0; r < tmpR.length; r++) {
+                this.drawArea(tmpC[c], tmpR[r]);
             }
         }
-    }
+    };
+
+    this.draw = function () {
+        var self = this;
+        this.forEachArea(function (col, row) {
+            self.drawArea(col, row);
+        });
+    };
+
+    this.countDots = function () {
+        var self = this, count = 0;
+
+        this.forEachArea(function (col, row) {
+            if (self.map[row][col] === 3 || self.map[row][col] === 4) count++;
+        });
+
+        return count;
+    };
 
 
 }

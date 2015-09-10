@@ -61,6 +61,7 @@ module.exports = function(grunt) {
                     "src/js/board.js",
                     "src/js/pacman.js",
                     "src/js/ghost.js",
+                    "src/js/controller.js",
                     "src/js/index.js",
                 ],
                 dest: "build/<%= pkg.name %>.js",

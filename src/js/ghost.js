@@ -22,6 +22,8 @@ function Ghost (gameConfig, characterConfig) {
     // 2 - down
     // 3 - left
     this.direction = 1;
+    this.panicked = 0;
+    this.dead = 0;
 
     //#########################################################################
     // METHODS

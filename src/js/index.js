@@ -2,7 +2,7 @@
 function Game () {
     var canvas = document.querySelector('canvas'),
         config = {
-            areaSize : 26,
+            areaSize : 16,
             canvasContext : canvas.getContext('2d')
         },
 
@@ -27,7 +27,15 @@ function Game () {
             { x : 12, y : 13, color : '#6FF' }
         ),
         clyde = new Ghost(
-            config, { x : 16, y : 13, color : '#FA0' }
+            config,
+            { x : 16, y : 13, color : '#FA0' }
+        ),
+
+        controller = new Controller(
+            config,
+            board,
+            pacman,
+            [blinky, pinky, inky, clyde]
         );
 
         canvas.width = config.areaSize * board.cols;
@@ -39,6 +47,12 @@ function Game () {
         pinky.draw();
         inky.draw();
         clyde.draw();
+
+        controller.tick();
+        controller.tick();
+        controller.tick();
+        controller.tick();
+        controller.tick();
 }
 
 new Game();
