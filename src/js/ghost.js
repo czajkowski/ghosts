@@ -6,7 +6,8 @@ function Ghost (gameConfig, characterConfig) {
     //#########################################################################
 
     var areaSize = gameConfig.areaSize,
-        canvasContext = gameConfig.canvasContext;
+        canvasContext = gameConfig.canvasContext,
+        deadTicksLeft = 0;
 
     //#########################################################################
     // PROPERTIES
@@ -15,6 +16,7 @@ function Ghost (gameConfig, characterConfig) {
     this.color = characterConfig.color;
     this.x = characterConfig.x;
     this.y = characterConfig.y;
+    this.selected = characterConfig.selected;
 
     // Directions
     // 0 - top
@@ -29,6 +31,10 @@ function Ghost (gameConfig, characterConfig) {
     // METHODS
     //#########################################################################
 
+    this.init = function () {
+        this.draw()
+    };
+
     this.draw = function () {
         var x = this.x * areaSize,
             y = this.y * areaSize + areaSize / 2,
@@ -39,8 +45,18 @@ function Ghost (gameConfig, characterConfig) {
             horizontalPositioner = [0, 1, 0, -1],
             verticalPositioner = [-1, 0, 1, 0];
 
+        if (this.selected && !this.panicked && !this.dead) {
+            canvasContext.fillStyle = '#AAA';
+            canvasContext.beginPath();
+            canvasContext.lineTo(x + areaSize / 1.6, y + areaSize / 1.6);
+            canvasContext.lineTo(x - areaSize / 1.6, y + areaSize / 1.6);
+            canvasContext.arc(x, y, areaSize / 1.6, -Math.PI, 0);
+            canvasContext.closePath();
+            canvasContext.fill();
+        }
+
         // character
-        canvasContext.fillStyle = this.color;
+        canvasContext.fillStyle = this.dead ? '#00F' : this.color;
         canvasContext.beginPath();
         canvasContext.lineTo(x + areaSize / 2, y + areaSize / 2);
         canvasContext.lineTo(x + (areaSize / 6) * 2, y + (areaSize / 6) * 2);
@@ -89,6 +105,33 @@ function Ghost (gameConfig, characterConfig) {
         );
         canvasContext.closePath();
         canvasContext.fill();
-    }
+    };
+
+    this.move = function () {
+        if (deadTicksLeft) {
+            if (deadTicksLeft === 1) {
+                this.revive();
+            }
+
+            deadTicksLeft--;
+        }
+    };
+
+    this.panic = function () {
+        this.panicked = true;
+    };
+
+    this.calm = function () {
+        this.panicked = false;
+    };
+
+    this.die = function () {
+        this.dead = true;
+        deadTicksLeft = gameConfig.deadTicks;
+    };
+
+    this.revive = function () {
+        this.dead = false;
+    };
 
 }

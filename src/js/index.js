@@ -1,8 +1,15 @@
 /* jshint ignore:start */
+
+// Characters
+// - max speed is 1
+
 function Game () {
     var canvas = document.querySelector('canvas'),
         config = {
-            areaSize : 16,
+            tickTime : 10,
+            panickedTicks : 100,
+            deadTicks : 100,
+            areaSize : 20,
             canvasContext : canvas.getContext('2d')
         },
 
@@ -10,13 +17,13 @@ function Game () {
 
         pacman = new Pacman(
             config,
-            { x :14, y : 23 },
+            { x :14, y : 23 , speed: 0.7},
             board
         ),
 
         blinky = new Ghost(
             config,
-            { x :14, y : 11, color : '#F00' }
+            { x :14, y : 11, color : '#F00', selected : 1 }
         ),
         pinky = new Ghost(
             config,
@@ -31,6 +38,8 @@ function Game () {
             { x : 16, y : 13, color : '#FA0' }
         ),
 
+        pathfinder = new Pathfinder(),
+
         controller = new Controller(
             config,
             board,
@@ -41,18 +50,11 @@ function Game () {
         canvas.width = config.areaSize * board.cols;
         canvas.height = config.areaSize * board.rows;
 
-        board.draw();
-        pacman.draw();
-        blinky.draw();
-        pinky.draw();
-        inky.draw();
-        clyde.draw();
+        var pacmanPath = pathfinder.calculatePacmanPath(board.map, pacman, [blinky, pinky, inky, clyde]);
+        pacman.path = pacmanPath;
 
-        controller.tick();
-        controller.tick();
-        controller.tick();
-        controller.tick();
-        controller.tick();
+
+        controller.start();
 }
 
 new Game();
