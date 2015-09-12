@@ -60,7 +60,8 @@ module.exports = function(grunt) {
                 src: [
                     "src/js/board.js",
                     "src/js/pathfinder.js",
-                    "src/js/pacman.js",
+                    "src/js/character.js",
+                    "src/js/cakeman.js",
                     "src/js/ghost.js",
                     "src/js/controller.js",
                     "src/js/index.js",

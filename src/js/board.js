@@ -1,19 +1,13 @@
 /* jshint ignore:start */
 function Board (gameConfig) {
 
-    //#########################################################################
-    // VARIABLES
-    //#########################################################################
-
-    var areaSize = gameConfig.areaSize,
-        canvasContext = gameConfig.canvasContext;
 
     //#########################################################################
     // PROPERTIES
     //#########################################################################
 
+    // Map elements
     // 0 - empty road
-    // 1 - portal
     // 3 - dot
     // 4 - big dot
     // 8 - door
@@ -33,7 +27,7 @@ function Board (gameConfig) {
         [9,0,0,0,9,9,3,9,9,0,0,0,0,0,0,0,0,0,0,9,9,3,9,9,0,0,0,9],
         [9,9,9,9,9,9,3,9,9,0,9,9,9,8,8,9,9,9,0,9,9,3,9,9,9,9,9,9],
         [9,9,9,9,9,9,3,9,9,0,9,0,0,0,0,0,0,9,0,9,9,3,9,9,9,9,9,9],
-        [1,0,0,0,0,0,3,0,0,0,9,0,0,0,0,0,0,9,0,0,0,3,0,0,0,0,0,1],
+        [9,0,0,0,0,0,3,0,0,0,9,0,0,0,0,0,0,9,0,0,0,3,0,0,0,0,0,9],
         [9,9,9,9,9,9,3,9,9,0,9,0,0,0,0,0,0,9,0,9,9,3,9,9,9,9,9,9],
         [9,9,9,9,9,9,3,9,9,0,9,9,9,9,9,9,9,9,0,9,9,3,9,9,9,9,9,9],
         [9,0,0,0,9,9,3,9,9,0,0,0,0,0,0,0,0,0,0,9,9,3,9,9,0,0,0,9],
@@ -51,59 +45,83 @@ function Board (gameConfig) {
         [9,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,9],
         [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
     ];
+
     this.cols = this.map[0].length;
     this.rows = this.map.length;
 
+    this.ghostShelter = {
+        x : 14,
+        y : 14
+    };
+
     //#########################################################################
-    // FUNCTIONS
+    // HELPER FUNCTIONS
     //#########################################################################
 
+    // Draw solid map element.
+    //
+    // Parameters:
     // col, row - coordinates,
-    // t, r, b, l - surrounding: top, right, bottom, left - if any truthy, connect to it
-    // door - is door
+    // top, right, bottom, left - surrounding elements - if any truthy, connect to it
+    // door - draw as door
     function drawSolid (col, row, top, right, bottom, left, door) {
 
-        canvasContext.fillStyle = '#111';
-        canvasContext.fillRect(col * areaSize, row * areaSize, areaSize, areaSize);
+        gameConfig.ctx.fillStyle = '#111';
+        gameConfig.ctx.fillRect(col * gameConfig.areaSize, row * gameConfig.areaSize, gameConfig.areaSize, gameConfig.areaSize);
 
-        canvasContext.fillStyle = door ? '#333' : '#00F';
-        top && canvasContext.fillRect(
-            col * areaSize + (areaSize / 16) * 7,
-            row * areaSize,
-            areaSize / 8,
-            areaSize / 2
-        );
+        gameConfig.ctx.fillStyle = door ? '#333' : '#00F';
+        if (top) {
+            gameConfig.ctx.fillRect(
+                col * gameConfig.areaSize + (gameConfig.areaSize / 16) * 7,
+                row * gameConfig.areaSize,
+                gameConfig.areaSize / 8,
+                gameConfig.areaSize / 2
+            );
+        }
 
-        right && canvasContext.fillRect(
-            col * areaSize + areaSize / 2,
-            row * areaSize + (areaSize / 16) * 7,
-            areaSize / 2,
-            areaSize / 8
-        );
+        if (right) {
+            gameConfig.ctx.fillRect(
+                col * gameConfig.areaSize + gameConfig.areaSize / 2,
+                row * gameConfig.areaSize + (gameConfig.areaSize / 16) * 7,
+                gameConfig.areaSize / 2,
+                gameConfig.areaSize / 8
+            );
+        }
 
-        bottom && canvasContext.fillRect(
-            col * areaSize + (areaSize / 16) * 7,
-            row * areaSize + areaSize / 2,
-            areaSize / 8,
-            areaSize / 2
-        );
+        if (bottom) {
+            gameConfig.ctx.fillRect(
+                col * gameConfig.areaSize + (gameConfig.areaSize / 16) * 7,
+                row * gameConfig.areaSize + gameConfig.areaSize / 2,
+                gameConfig.areaSize / 8,
+                gameConfig.areaSize / 2
+            );
+        }
 
-        left && canvasContext.fillRect(
-            col * areaSize,
-            row * areaSize + (areaSize / 16) * 7,
-            areaSize / 2,
-            areaSize / 8
-        );
+        if (left) {
+            gameConfig.ctx.fillRect(
+                col * gameConfig.areaSize,
+                row * gameConfig.areaSize + (gameConfig.areaSize / 16) * 7,
+                gameConfig.areaSize / 2,
+                gameConfig.areaSize / 8
+            );
+        }
     }
 
+    // Parameters
     // col, row - coordinates,
-    // big - is big dot
+    // big - draw big dot
     function drawDot (col, row, big) {
-        canvasContext.fillStyle = '#FFF';
-        canvasContext.beginPath();
-        canvasContext.arc(col * areaSize + areaSize / 2, row * areaSize + areaSize / 2, areaSize / (big ? 4 : 10), 0 ,2*Math.PI);
-        canvasContext.closePath();
-        canvasContext.fill();
+        gameConfig.ctx.fillStyle = '#FFF';
+        gameConfig.ctx.beginPath();
+        gameConfig.ctx.arc(
+            col * gameConfig.areaSize + gameConfig.areaSize / 2,
+            row * gameConfig.areaSize + gameConfig.areaSize / 2,
+            gameConfig.areaSize / (big ? 4 : 10),
+            0,
+            2 * Math.PI
+        );
+        gameConfig.ctx.closePath();
+        gameConfig.ctx.fill();
     }
 
 
@@ -111,7 +129,8 @@ function Board (gameConfig) {
     // METHODS
     //#########################################################################
 
-    this.forEachArea = function (fn) {
+    // Execute function for each map area.
+    this.eachArea = function (fn) {
         var col, row;
 
         for (col = 0; col < this.cols; col++) {
@@ -121,16 +140,15 @@ function Board (gameConfig) {
         }
     }
 
-
-    // col, row - coordinates,
+    // Draw map area
     this.drawArea = function (col, row) {
         var top, right, bottom, left;
 
-        // clear area
-        canvasContext.fillStyle = '#000';
-        canvasContext.fillRect(col * areaSize, row * areaSize, areaSize, areaSize);
+        // Clear area.
+        gameConfig.ctx.fillStyle = '#000';
+        gameConfig.ctx.fillRect(col * gameConfig.areaSize, row * gameConfig.areaSize, gameConfig.areaSize, gameConfig.areaSize);
 
-        // check if coresponding elements are solid
+        // Check if coresponding elements are solid
         top = row == 0 ? 0 : this.map[row - 1][col] > 7;
         right = col == this.cols - 1 ? 0 : this.map[row][col + 1] > 7;
         bottom = row == this.rows - 1 ? 0 : this.map[row + 1][col] > 7;
@@ -156,14 +174,34 @@ function Board (gameConfig) {
         }
     };
 
-    // draw area and all its neighbours
-    this.drawSurrounding = function (col, row) {
-        var tmpC = [col], tmpR = [row], c, r;
+    this.isSmallDot = function (col, row) {
+        return this.map[row][col] === 3;
+    };
 
-        col > 0 && tmpC.push(col - 1);
+    this.isBigDot = function (col, row) {
+        return this.map[row][col] === 4;
+    };
+
+    this.isDot = function (col, row) {
+        return this.isSmallDot(col, row) || this.isBigDot(col, row);
+    };
+
+    this.clearArea = function (col, row) {
+        this.map[row][col] = 0;
+    };
+
+    // Draw area and all its neighbours.
+    this.drawSurrounding = function (col, row) {
+        var tmpC = [col],
+            tmpR = [row],
+            c,
+            r;
+
+        // Calculate surrounding colls and rows.
+        col > 0             && tmpC.push(col - 1);
         col < this.cols - 1 && tmpC.push(col + 1);
 
-        row > 0 && tmpR.push(row - 1);
+        row > 0             && tmpR.push(row - 1);
         row < this.rows - 1 && tmpR.push(row + 1);
 
         for (c = 0; c < tmpC.length; c++) {
@@ -173,18 +211,17 @@ function Board (gameConfig) {
         }
     };
 
+    // Draw whole map
     this.draw = function () {
-        var self = this;
-        this.forEachArea(function (col, row) {
-            self.drawArea(col, row);
-        });
+        this.eachArea(this.drawArea.bind(this));
     };
 
     this.countDots = function () {
-        var self = this, count = 0;
+        var self = this,
+            count = 0;
 
-        this.forEachArea(function (col, row) {
-            if (self.map[row][col] === 3 || self.map[row][col] === 4) count++;
+        this.eachArea(function (col, row) {
+            if (self.isDot(col, row)) count++;
         });
 
         return count;

@@ -1,130 +1,172 @@
 /* jshint ignore:start */
-function Controller (gameConfig, board, pathfinder, pacman, ghosts) {
+function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
 
     //#########################################################################
     // VARIABLED
     //#########################################################################
 
-    var tickTime = gameConfig.tickTime,
-        interval,
+    var mainInterval,
         panickedTicksLeft = 0;
 
     //#########################################################################
-    // PROPERTIES
+    // HELPER FUNCTIONS
     //#########################################################################
 
-    this.points = 0;
-    // Map
-    // 0 - empty road
-    // 1 - portal
-    // 3 - dot
-    // 4 - big dot
-    // 8 - door
-    // 9 - wall
-
-    // Directions
-    // 0 - top
-    // 1 - right
-    // 2 - down
-    // 3 - left
-
-    //#########################################################################
-    // FUNCTIONS
-    //#########################################################################
-
-    function forEachGhost (fn) {
+    // Helper method execiting passed function
+    // for each ghost.
+    function eachGhost (fn) {
         ghosts.forEach(fn)
     }
 
-    function forEachCharacter (fn) {
-        forEachGhost(fn);
-        fn(pacman);
+    // Helper method execiting passed function
+    // for each character.
+    function eachCharacter (fn) {
+        eachGhost(fn);
+        fn(cakeman);
     }
 
-    function moveAllCharacters () {
-        forEachCharacter(function (character) {
+    // Moves each character and cleares area
+    // he was previously on.
+    function moveCharacters () {
+        eachCharacter(function (character) {
             character.move();
             board.drawSurrounding(character.x, character.y);
         });
     }
 
-    function drawAllCharacters () {
-        forEachCharacter(function (character) {
+    // Draws each character.
+    function drawCharacters () {
+        eachCharacter(function (character) {
             character.draw();
         });
     }
 
+    // Reeturns a living ahos if it is in the area
+    function getGhostInArea (col, row) {
+        var g;
+
+        for(g = 0; g < ghosts.length; g++) {
+            if (!ghosts[g].dead && col === ghosts[g].x && row === ghosts[g].y) {
+                return ghosts[g];
+            }
+        }
+        return null;
+    }
+
+    function isGhostInArea (col, row) {
+        return getGhostInArea(col, row) !== null;
+    }
+
+    // Checks if where is a living ghost on any
+    // segment of given path.
+    //
+    // Used to determin if main character
+    // should change path.
     function isGhostOnPath (path) {
-        var i, g;
+        var i;
 
         for (i = 0; i<path.length; i++) {
-            for(g = 0; g < ghosts.length; g++) {
-                if (!ghosts[g].dead && path[i].x === ghosts[g].x && path[i].y === ghosts[g].y) {
-                    return true;
-                }
+            if (isGhostInArea(path[i].x, path[i].y)) {
+                return true;
             }
         }
         return false;
     }
 
-    function tick () {
+    //#########################################################################
+    // PROPERTIES
+    //#########################################################################
 
-        if (panickedTicksLeft) {
-            if (panickedTicksLeft === 1) {
-                forEachGhost(function (ghost) {
-                    ghost.calm();
-                });
-            }
-
-            panickedTicksLeft--;
-        }
-
-        if ((pacman.path.length == 0 || isGhostOnPath(pacman.path)) && board.countDots() > 0) {
-            pacman.path = pathfinder.calculatePacmanPath(board.map, pacman, ghosts);
-        }
-
-        forEachGhost(function (ghost) {
-            if (ghost.path.length == 0) {
-                ghost.path = pathfinder.calculateGhostPath(board.map, ghost);
-            }
-        });
-
-        moveAllCharacters();
-
-
-        if (board.map[pacman.y][pacman.x] === 3) {
-            board.map[pacman.y][pacman.x] = 0;
-
-            this.points += 10;
-        }
-
-        if (board.map[pacman.y][pacman.x] === 4) {
-            board.map[pacman.y][pacman.x] = 0;
-
-            this.points += 50;
-
-            forEachGhost(function (ghost) {
-                ghost.panic();
-            });
-
-            panickedTicksLeft = gameConfig.panickedTicks;
-        }
-
-        drawAllCharacters();
-    }
+    // Points gathered by main character.
+    this.points = 0;
 
     //#########################################################################
     // METHODS
     //#########################################################################
 
+    this.tick = function () {
+        var ghost;
+
+        // Check if ghosts are panicked
+        if (panickedTicksLeft) {
+            panickedTicksLeft--;
+
+            // If counter reaches 0, calm ghosts down.
+            if (panickedTicksLeft === 0) {
+                eachGhost(function (ghost) {
+                    ghost.panicked = false;
+                });
+            }
+
+        }
+
+        // Calculate main character path
+        if ((cakeman.path.length === 0 ) && board.countDots() > 0) {
+            cakeman.path = pathfinder.calculateCakemanPath(board.map, cakeman, ghosts);
+        }
+
+        // Calculate ghost paths
+        eachGhost(function (ghost) {
+            if (ghost.path.length === 0) {
+                // If ghost at destination revive it.
+                // Ghost paths are only recalculated when they die
+                // or when they reach destination.
+                // When they die new path is calculated to the ghost shelter.
+                // In either situation ghost should be alive at its destination.
+                ghost.dead = false;
+                ghost.path = pathfinder.calculateGhostPath(board.map, ghost);
+            }
+        });
+
+        moveCharacters();
+
+        ghost = getGhostInArea(cakeman.x, cakeman.y);
+        if (ghost) {
+            if (ghost.panicked) {
+                ghost.dead = true;
+
+                // Galculate ghost path to shelter.
+                ghost.path = pathfinder.calculatePath(board.map, ghost, board.  ghostShelter);
+
+            } else {
+                // Living ghost!
+                this.stop();
+            }
+        }
+
+        if (board.isSmallDot(cakeman.x, cakeman.y)) {
+            board.clearArea(cakeman.x, cakeman.y);
+            this.points += 10;
+        }
+
+        if (board.isBigDot(cakeman.x, cakeman.y)) {
+            board.clearArea(cakeman.x, cakeman.y);
+            this.points += 50;
+
+            eachGhost(function (ghost) {
+                ghost.panicked = true;
+            });
+
+            // Count down panicked ticks.
+            panickedTicksLeft = gameConfig.panickedTicks;
+        }
+
+        drawCharacters();
+
+    };
+
     this.start = function () {
         board.draw();
 
-        forEachCharacter(function (character) {
+        eachCharacter(function (character) {
             character.init();
         });
 
-        intervel = setInterval(tick.bind(this), tickTime);
+        mainInterval = setInterval(this.tick.bind(this), gameConfig.tickTime);
+    };
+
+    this.stop = function () {
+        clearInterval(mainInterval);
     };
 
 }

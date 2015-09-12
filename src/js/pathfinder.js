@@ -91,12 +91,12 @@ function Pathfinder() {
     // 8 - door
     // 9 - wall
     // 10 - ghost
-    // 100 - pacman
-    astar._isPacmanUnreachable = function (node) {
+    // 100 - cakeman
+    astar._iscakemanUnreachable = function (node) {
         return node.value > 4;
     };
 
-    astar._calculatePacmanPromotion = function (node) {
+    astar._calculatecakemanPromotion = function (node) {
         if (node.value === 3 || node.value === 4) {
             return 1;
         }
@@ -246,9 +246,9 @@ function Pathfinder() {
     // 8 - door
     // 9 - wall
     // 10 - ghost
-    // 100 - pacman
+    // 100 - cakeman
 
-    this.calculatePacmanPath = function (map, pacman, ghosts) {
+    this.calculateCakemanPath = function (map, cakeman, ghosts) {
         var nodeList = [],
             dot;
 
@@ -265,10 +265,10 @@ function Pathfinder() {
             astar.prepare(map);
             nodeList = astar.calculatePath(
                 map,
-                map[pacman.targetY][pacman.targetX],
+                map[cakeman.targetY][cakeman.targetX],
                 map[dot.y][dot.x],
-                astar._isPacmanUnreachable,
-                astar._calculatePacmanPromotion
+                astar._iscakemanUnreachable,
+                astar._calculatecakemanPromotion
             );
         }
 
@@ -294,6 +294,22 @@ function Pathfinder() {
         }
 
         return nodeList;
-    }
+    };
+
+    this.calculatePath = function (map, target, destination) {
+        var nodeList = [];
+
+        map = cloneMap(map),
+        astar.prepare(map);
+        nodeList = astar.calculatePath(
+            map,
+            map[target.y][target.x],
+            map[destination.y][destination.x],
+            astar._isGhostUnreachable, // only walls
+            function () { return 1; } // no promotion
+        );
+
+        return nodeList;
+    };
 
 }

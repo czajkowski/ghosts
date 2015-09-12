@@ -10,12 +10,12 @@ function Game () {
             panickedTicks : 100,
             deadTicks : 100,
             areaSize : 20,
-            canvasContext : canvas.getContext('2d')
+            ctx : canvas.getContext('2d')
         },
 
         board = new Board(config),
 
-        pacman = new Pacman(
+        cakeman = new Cakeman(
             config,
             { x :14, y : 23 , speed: 1},
             board
@@ -44,7 +44,7 @@ function Game () {
             config,
             board,
             pathfinder,
-            pacman,
+            cakeman,
             [blinky, pinky, inky, clyde]
         );
 
