@@ -149,10 +149,10 @@ function Board (gameConfig) {
         gameConfig.ctx.fillRect(col * gameConfig.areaSize, row * gameConfig.areaSize, gameConfig.areaSize, gameConfig.areaSize);
 
         // Check if coresponding elements are solid
-        top = row == 0 ? 0 : this.map[row - 1][col] > 7;
-        right = col == this.cols - 1 ? 0 : this.map[row][col + 1] > 7;
-        bottom = row == this.rows - 1 ? 0 : this.map[row + 1][col] > 7;
-        left = col == 0 ? 0 : this.map[row][col - 1] > 7;
+        top = row == 0 ? 0 : this.map[row - 1][col] > Map.BIG_DOT;
+        right = col == this.cols - 1 ? 0 : this.map[row][col + 1] > Map.BIG_DOT;
+        bottom = row == this.rows - 1 ? 0 : this.map[row + 1][col] > Map.BIG_DOT;
+        left = col == 0 ? 0 : this.map[row][col - 1] > Map.BIG_DOT;
 
         switch (this.map[row][col]) {
             case 9 :
@@ -169,17 +169,22 @@ function Board (gameConfig) {
                 break;
             case 4 :
                 // big dot
-                drawDot(col, row, 1);
+                drawDot(col, row, true);
                 break;
         }
     };
 
+    this.isWall = function (col, row) {
+        return this.map[row][col] === Map.WALL;
+    };
+
+
     this.isSmallDot = function (col, row) {
-        return this.map[row][col] === 3;
+        return this.map[row][col] === Map.DOT;
     };
 
     this.isBigDot = function (col, row) {
-        return this.map[row][col] === 4;
+        return this.map[row][col] === Map.BIG_DOT;
     };
 
     this.isDot = function (col, row) {
@@ -187,7 +192,7 @@ function Board (gameConfig) {
     };
 
     this.clearArea = function (col, row) {
-        this.map[row][col] = 0;
+        this.map[row][col] = Map.EMPTY;
     };
 
     // Draw area and all its neighbours.
@@ -212,7 +217,7 @@ function Board (gameConfig) {
     };
 
     // Draw whole map
-    this.draw = function () {
+    this.drawMap = function () {
         this.eachArea(this.drawArea.bind(this));
     };
 
@@ -227,5 +232,50 @@ function Board (gameConfig) {
         return count;
     };
 
+    this.drawFooter = function (ghosts) {
+        var i, x, y;
+
+        gameConfig.ctx.fillStyle = '#000';
+        gameConfig.ctx.fillRect(
+            0,
+            this.rows * gameConfig.areaSize,
+            this.cols * gameConfig.areaSize,
+            gameConfig.footerHeight
+        );
+
+        for (i = 0; i<ghosts.length; i++) {
+            x = this.cols / 2 * gameConfig.areaSize + gameConfig.areaSize * 3 * i;
+            y = this.rows * gameConfig.areaSize + 30;
+
+            gameConfig.ctx.textAlign = "left";
+            gameConfig.ctx.fillStyle = '#AAA';
+            gameConfig.ctx.font="16px 'Lucida Console'";
+            gameConfig.ctx.fillText(i + 1, x, y);
+
+            ghosts[i].draw.call({
+                _x : x + gameConfig.areaSize * 1.3,
+                _y : y - 7,
+                color : ghosts[i].color,
+                direction: Direction.LEFT
+            })
+        }
+    };
+
+    this.drawPoints = function (points) {
+        gameConfig.ctx.textAlign = "left";
+        gameConfig.ctx.fillStyle = '#000';
+        gameConfig.ctx.fillRect(
+            0,
+            this.rows * gameConfig.areaSize + 10,
+            this.cols / 2 * gameConfig.areaSize,
+            gameConfig.footerHeight);
+
+        gameConfig.ctx.fillStyle = '#AAA';
+        gameConfig.ctx.font="16px 'Lucida Console'";
+        gameConfig.ctx.fillText("POINTS: " + points,
+            10,
+            this.rows * gameConfig.areaSize + 30
+        );
+    };
 
 }

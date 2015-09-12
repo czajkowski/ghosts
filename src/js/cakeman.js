@@ -2,11 +2,14 @@
 function Cakeman (gameConfig, characterConfig) {
     Character.apply(this, arguments);
 
+    this.color = '#FE0';
+
     this.draw = function () {
+        console.log("DRAW CAKE");
         var x = this._x,
             y = this._y,
             r = Math.PI / 2 * this.direction,
-            s = (this.moveCounter / 40) % 1 * 0.25 * Math.PI;
+            s = 0.25 * Math.PI * (((this.moveCounter % 40) + 1) / 40);
 
         gameConfig.ctx.fillStyle = this.color;
         gameConfig.ctx.beginPath();

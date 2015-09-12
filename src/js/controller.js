@@ -6,7 +6,157 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
     //#########################################################################
 
     var mainInterval,
-        panickedTicksLeft = 0;
+        panickedTicksLeft = 0,
+        selectedGhost,
+        eventHandler,
+        successCallback,
+        failureCallback;
+
+    eventHandler = (function (e) {
+        var code = e.which || e.keyCode,
+            ghostId;
+
+        // Ghost selecte
+        if (code > 48 && code <= 48 + ghosts.length) {
+            ghostId = code - 48 - 1;
+
+            if (ghosts[ghostId] !== selectedGhost) {
+                selectedGhost && (selectedGhost.selected = false);
+                selectedGhost = ghosts[ghostId]
+                selectedGhost.selected = true;
+                selectedGhost.path = [];
+            }
+        }
+
+        // Arrows
+        if (selectedGhost && selectedGhost.path.length === 0) {
+            switch (code) {
+                case 37 :
+                    // left
+                    if (!board.isWall(selectedGhost.targetX - 1, selectedGhost.targetY)) {
+                        selectedGhost.path.push({
+                            y : selectedGhost.targetY,
+                            x : selectedGhost.targetX - 1
+                        });
+                    } else if (selectedGhost.direction === Direction.UP &&
+                                !board.isWall(selectedGhost.targetX - 1, selectedGhost.targetY - 1)) {
+                        // Cutting corners
+                        // Move up and then left
+                        selectedGhost.path.push({
+                            y : selectedGhost.targetY - 1,
+                            x : selectedGhost.targetX
+                        }, {
+                            y : selectedGhost.targetY - 1,
+                            x : selectedGhost.targetX - 1
+                        });
+                    } else if (selectedGhost.direction === Direction.DOWN &&
+                                !board.isWall(selectedGhost.targetX - 1, selectedGhost.targetY + 1)) {
+                        // Cutting corners
+                        // Move down and then left
+                        selectedGhost.path.push({
+                            x : selectedGhost.targetX,
+                            y : selectedGhost.targetY + 1
+                        }, {
+                            x : selectedGhost.targetX - 1,
+                            y : selectedGhost.targetY + 1
+                        });
+                    }
+                    break;
+                case 38 :
+                    // up
+                    if (!board.isWall(selectedGhost.targetX, selectedGhost.targetY - 1)) {
+                        selectedGhost.path.push({
+                            x : selectedGhost.targetX,
+                            y : selectedGhost.targetY - 1
+                        });
+                    } else if (selectedGhost.direction === Direction.RIGHT &&
+                                !board.isWall(selectedGhost.targetX + 1, selectedGhost.targetY - 1)) {
+                        // Cutting corners
+                        // Move up and then right
+                        selectedGhost.path.push({
+                            x : selectedGhost.targetX + 1,
+                            y : selectedGhost.targetY
+                        }, {
+                            x : selectedGhost.targetX + 1,
+                            y : selectedGhost.targetY - 1
+                        });
+                    } else if (selectedGhost.direction === Direction.LEFT &&
+                                !board.isWall(selectedGhost.targetX - 1, selectedGhost.targetY - 1)) {
+                        // Cutting corners
+                        // Move down and then right
+                        selectedGhost.path.push({
+                            x : selectedGhost.targetX - 1,
+                            y : selectedGhost.targetY
+                        }, {
+                            x : selectedGhost.targetX - 1,
+                            y : selectedGhost.targetY - 1
+                        });
+                    }
+                    break;
+                case 39 :
+                    // right
+                    if (!board.isWall(selectedGhost.targetX + 1, selectedGhost.targetY)) {
+                        selectedGhost.path.push({
+                            y : selectedGhost.targetY,
+                            x : selectedGhost.targetX + 1
+                        });
+                    } else if (selectedGhost.direction === Direction.UP &&
+                                !board.isWall(selectedGhost.targetX + 1, selectedGhost.targetY - 1)) {
+                        // Cutting corners
+                        // Move up and then right
+                        selectedGhost.path.push({
+                            x : selectedGhost.targetX,
+                            y : selectedGhost.targetY - 1
+                        }, {
+                            x : selectedGhost.targetX + 1,
+                            y : selectedGhost.targetY - 1
+                        });
+                    } else if (selectedGhost.direction === Direction.DOWN &&
+                                !board.isWall(selectedGhost.targetX + 1, selectedGhost.targetY + 1)) {
+                        // Cutting corners
+                        // Move down and then right
+                        selectedGhost.path.push({
+                            x : selectedGhost.targetX,
+                            y : selectedGhost.targetY + 1
+                        }, {
+                            x : selectedGhost.targetX + 1,
+                            y : selectedGhost.targetY + 1
+                        });
+                    }
+                    break;
+                case 40 :
+                    // down
+                    if (!board.isWall(selectedGhost.targetX, selectedGhost.targetY + 1)) {
+                        selectedGhost.path.push({
+                            x : selectedGhost.targetX,
+                            y : selectedGhost.targetY + 1
+                        });
+                    } else if (selectedGhost.direction === Direction.RIGHT &&
+                                !board.isWall(selectedGhost.targetX + 1, selectedGhost.targetY + 1)) {
+                        // Cutting corners
+                        // Move up and then right
+                        selectedGhost.path.push({
+                            x : selectedGhost.targetX + 1,
+                            y : selectedGhost.targetY
+                        }, {
+                            x : selectedGhost.targetX + 1,
+                            y : selectedGhost.targetY + 1
+                        });
+                    } else if (selectedGhost.direction === Direction.LEFT &&
+                                !board.isWall(selectedGhost.targetX - 1, selectedGhost.targetY + 1)) {
+                        // Cutting corners
+                        // Move down and then right
+                        selectedGhost.path.push({
+                            x : selectedGhost.targetX - 1,
+                            y : selectedGhost.targetY
+                        }, {
+                            x : selectedGhost.targetX - 1,
+                            y : selectedGhost.targetY + 1
+                        });
+                    }
+            }
+        }
+    }).bind(this);
 
     //#########################################################################
     // HELPER FUNCTIONS
@@ -86,32 +236,7 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
 
     this.addPoints = function (add) {
         this.points += add;
-        this.drawPoints();
-    };
-
-    this.drawFooter = function () {
-        gameConfig.ctx.fillStyle = '#000';
-        gameConfig.ctx.fillRect(
-            0,
-            board.rows * gameConfig.areaSize,
-            board.cols * gameConfig.areaSize,
-            gameConfig.footerHeight);
-    };
-
-    this.drawPoints = function () {
-        gameConfig.ctx.fillStyle = '#000';
-        gameConfig.ctx.fillRect(
-            0,
-            board.rows * gameConfig.areaSize + 10,
-            board.cols / 2 * gameConfig.areaSize,
-            gameConfig.footerHeight);
-
-        gameConfig.ctx.fillStyle = '#AAA';
-        gameConfig.ctx.font="16px 'Lucida Console'";
-        gameConfig.ctx.fillText("POINTS: " + this.points,
-            10,
-            board.rows * gameConfig.areaSize + 30
-        );
+        board.drawPoints(this.points);
     };
 
     this.tick = function () {
@@ -144,7 +269,10 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
                 // When they die new path is calculated to the ghost shelter.
                 // In either situation ghost should be alive at its destination.
                 ghost.dead = false;
-                ghost.path = pathfinder.calculateGhostPath(board.map, ghost);
+
+                if (!ghost.selected) {
+                    ghost.path = pathfinder.calculateGhostPath(board.map, ghost);
+                }
             }
         });
 
@@ -160,8 +288,11 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
                 this.addPoints(200);
 
             } else {
-                // Living ghost!
+                // Living ghost encountered.
                 this.stop();
+
+                // Game won!
+                successCallback();
             }
         }
 
@@ -183,22 +314,42 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
         }
 
         drawCharacters();
+
+        if (board.countDots() === 0) {
+            // Game lost!
+            failureCallback();
+        }
+
     };
 
-    this.start = function () {
-        board.draw();
-        this.drawFooter();
-        this.drawPoints();
+    this.start = function (onSuccess, onFailure) {
+        successCallback = onSuccess;
+        failureCallback = onFailure;
+
+        board.drawMap();
+
+        board.drawFooter(ghosts);
+        board.drawPoints(this.points);
+
+        // Use ghost drawing methods to draw ghosts on footer
+        eachGhost(function (ghost, index) {
+        });
 
         eachCharacter(function (character) {
             character.init();
         });
 
         mainInterval = setInterval(this.tick.bind(this), gameConfig.tickTime);
+
+        document.addEventListener("keypress", eventHandler);
     };
 
     this.stop = function () {
         clearInterval(mainInterval);
+
+        document.removeEventListener("keypress", eventHandler);
     };
+
+
 
 }

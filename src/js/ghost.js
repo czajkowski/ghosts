@@ -28,11 +28,11 @@ function Ghost (gameConfig, characterConfig) {
 
     // Ghost speed is multiplied when dead
     this.getXSpeed = function () {
-        return Character.prototype.getXSpeed.call(this) * (this.dead ? 5 : 1);
+        return Character.prototype.getXSpeed.call(this) * (this.dead ? 5 : 1) * (this.selected ? 1.5 : 1);
     };
 
     this.getYSpeed = function () {
-        return Character.prototype.getYSpeed.call(this) * (this.dead ? 5 : 1);
+        return Character.prototype.getYSpeed.call(this) * (this.dead ? 5 : 1) * (this.selected ? 1.5 : 1);
     };
 
     this.draw = function () {
@@ -49,7 +49,7 @@ function Ghost (gameConfig, characterConfig) {
 
         // When ghost selected. draw ligher background to mark it on
         // the board.
-        if (this.selected && !this.panicked && !this.dead) {
+        if (this.selected && !this.dead) {
             // Calc background color for blinking effect.
             hexPart = (this.moveCounter % 50) * 3 + 50;
             gameConfig.ctx.fillStyle = rgbToHex(hexPart, hexPart, hexPart);
@@ -114,20 +114,6 @@ function Ghost (gameConfig, characterConfig) {
         gameConfig.ctx.closePath();
         gameConfig.ctx.fill();
     };
-
-    //#########################################################################
-    // EVENT HANDLERS
-    //#########################################################################
-
-    helpers.addEventListener(document, "keypress", (function (e) {
-        var code = e.which || e.keyCode;
-
-        if (code === 48 + characterConfig.id) {
-            this.selected = true;
-        } else {
-            this.selected = false;
-        }
-    }).bind(this));
 
 }
 

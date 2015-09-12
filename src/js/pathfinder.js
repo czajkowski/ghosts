@@ -24,7 +24,7 @@ function Pathfinder() {
 
         for (col = 0; col < map[0].length; col++) {
             for (row = 0; row < map.length; row++) {
-                if (map[row][col] === 3 || map[row][col] === 4) {
+                if (map[row][col] === Map.DOT || map[row][col] === Map.BIG_DOT) {
                     dots.push({
                         x : col,
                         y : row
@@ -44,7 +44,7 @@ function Pathfinder() {
 
         for (col = 0; col < map[0].length; col++) {
             for (row = 0; row < map.length; row++) {
-                if (map[row][col] !== 9) {
+                if (map[row][col] !== Map.WALL) {
                     dots.push({
                         x : col,
                         y : row
@@ -84,28 +84,20 @@ function Pathfinder() {
         return false;
     };
 
-    // 0 - empty road
-    // 1 - portal
-    // 3 - dot
-    // 4 - big dot
-    // 8 - door
-    // 9 - wall
-    // 10 - ghost
-    // 100 - cakeman
-    astar._iscakemanUnreachable = function (node) {
-        return node.value > 4;
+    astar._isCakemanUnreachable = function (node) {
+        return node.value > Map.BIG_DOT;
     };
 
-    astar._calculatecakemanPromotion = function (node) {
-        if (node.value === 3 || node.value === 4) {
+    astar._calculateCakemanPromotion = function (node) {
+        if (node.value === Map.DOT || node.value === Map.BIG_DOT) {
             return 1;
         }
 
-        return 1;
+        return 10;
     };
 
     astar._isGhostUnreachable = function (node) {
-        return node.value === 9;
+        return node.value === Map.WALL;
     };
 
     astar._calculateGhostPromotion = function (node) {
@@ -204,12 +196,12 @@ function Pathfinder() {
             }
         }
 
-        // No result was found -- empty array signifies failure to find path
+        // No result was found
         return [];
     };
 
     astar.heuristic = function(nodeA, nodeB) {
-        // This is the Manhattan distance
+        // Manhattan distance
         var d1 = Math.abs (nodeB.x - nodeA.x);
         var d2 = Math.abs (nodeB.y - nodeA.y);
         return d1 + d2;
@@ -239,15 +231,6 @@ function Pathfinder() {
     // METHODS
     //#########################################################################
 
-    // 0 - empty road
-    // 1 - portal
-    // 3 - dot
-    // 4 - big dot
-    // 8 - door
-    // 9 - wall
-    // 10 - ghost
-    // 100 - cakeman
-
     this.calculateCakemanPath = function (map, cakeman, ghosts) {
         var nodeList = [],
             dot;
@@ -256,7 +239,7 @@ function Pathfinder() {
 
         ghosts.forEach(function (ghost) {
             if (!ghost.dead) {
-                map[ghost.y][ghost.x] = 10;
+                map[ghost.y][ghost.x] = Map.GHOST;
             }
         });
 
@@ -267,8 +250,8 @@ function Pathfinder() {
                 map,
                 map[cakeman.targetY][cakeman.targetX],
                 map[dot.y][dot.x],
-                astar._iscakemanUnreachable,
-                astar._calculatecakemanPromotion
+                astar._isCakemanUnreachable,
+                astar._calculateCakemanPromotion
             );
         }
 

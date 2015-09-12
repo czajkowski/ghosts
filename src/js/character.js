@@ -8,7 +8,7 @@ function Character (gameConfig, characterConfig) {
     // 1 - right
     // 2 - down
     // 3 - left
-    this.direction;
+    this.direction = Direction.RIGHT;
 
     // X/Y variables starting with _
     // hold real character position (in pixels) on board.
@@ -45,8 +45,6 @@ function Character (gameConfig, characterConfig) {
     //#########################################################################
 
     this.init = function () {
-        this.direction = 1
-
         this.speedX = this.getXSpeed();
         this.speedY = 0;
 
@@ -99,22 +97,22 @@ function Character (gameConfig, characterConfig) {
 
             // Right
             if (this.targetX > this.x) {
-                this.direction = 1;
+                this.direction = Direction.RIGHT;
             }
 
             // Left
             if (this.targetX < this.x) {
-                this.direction = 3;
+                this.direction = Direction.LEFT;
             }
 
             // Down
             if (this.targetY > this.y) {
-                this.direction = 2;
+                this.direction = Direction.DOWN;
             }
 
             // Up
             if (this.targetY < this.y) {
-                this.direction = 0;
+                this.direction = Direction.UP;
             }
 
             // Set new target position at the center
