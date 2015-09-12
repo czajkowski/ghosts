@@ -19,11 +19,10 @@ function Game () {
         startEventHandler = (function (e) {
             var code = e.which || e.keyCode;
 
-            if (code === 112) {
+            if (code === 13) {
                 document.removeEventListener("keypress", startEventHandler);
                 this.start();
             }
-
         }).bind(this);
 
     canvas.width = config.areaSize * config.mapCols;
@@ -59,7 +58,7 @@ function Game () {
         config.ctx.fillStyle = '#FFF';
         config.ctx.font="16px 'Lucida Console'";
         config.ctx.fillText(
-            "PRESS F1 TO PLAY AGAIN",
+            "PRESS ENTER KEY TO PLAY AGAIN",
             config.mapCols * config.areaSize / 2,
             config.mapRows * config.areaSize / 3 + 3 * config.areaSize + 30
         );
@@ -88,7 +87,7 @@ function Game () {
 
         config.ctx.fillStyle = '#FFF';
         config.ctx.font="16px 'Lucida Console'";
-        config.ctx.fillText("PRESS F1 TO START", config.mapCols * config.areaSize / 2, canvas.height / 2  + 140);
+        config.ctx.fillText("PRESS ENTER KEY TO START", config.mapCols * config.areaSize / 2, canvas.height / 2  + 140);
 
         document.addEventListener("keypress", startEventHandler);
     };
@@ -103,19 +102,19 @@ function Game () {
 
             ghost1 = new Ghost(
                 config,
-                { x :14, y : 11, color : '#F00', speed:0.5 }
+                { x :14, y : 11, color : '#F00', speed:0.6 }
             ),
             ghost2 = new Ghost(
                 config,
-                { x : 14, y : 13, color : '#F99', speed: 0.5 }
+                { x : 14, y : 13, color : '#F99', speed: 0.6 }
             ),
             ghost3 = new Ghost(
                 config,
-                { x : 12, y : 13, color : '#6FF', speed: 0.5 }
+                { x : 12, y : 13, color : '#6FF', speed: 0.6 }
             ),
             ghost4 = new Ghost(
                 config,
-                { x : 16, y : 13, color : '#FA0', speed: 0.5 }
+                { x : 16, y : 13, color : '#FA0', speed: 0.6 }
             ),
 
             controller = new Controller(

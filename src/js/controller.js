@@ -16,7 +16,7 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
         var code = e.which || e.keyCode,
             ghostId;
 
-        // Ghost selecte
+        // Ghost select
         if (code > 48 && code <= 48 + ghosts.length) {
             ghostId = code - 48 - 1;
 
@@ -319,7 +319,6 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
             // Game lost!
             failureCallback();
         }
-
     };
 
     this.start = function (onSuccess, onFailure) {
@@ -341,13 +340,12 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
 
         mainInterval = setInterval(this.tick.bind(this), gameConfig.tickTime);
 
-        document.addEventListener("keypress", eventHandler);
+        document.addEventListener("keydown", eventHandler);
     };
 
     this.stop = function () {
         clearInterval(mainInterval);
-
-        document.removeEventListener("keypress", eventHandler);
+        document.removeEventListener("keydown", eventHandler);
     };
 
 

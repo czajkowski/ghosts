@@ -5,7 +5,6 @@ function Cakeman (gameConfig, characterConfig) {
     this.color = '#FE0';
 
     this.draw = function () {
-        console.log("DRAW CAKE");
         var x = this._x,
             y = this._y,
             r = Math.PI / 2 * this.direction,
