@@ -1,5 +1,5 @@
 /* jshint ignore:start */
-function Controller (gameConfig, board, pacman, ghosts) {
+function Controller (gameConfig, board, pathfinder, pacman, ghosts) {
 
     //#########################################################################
     // VARIABLED
@@ -14,7 +14,6 @@ function Controller (gameConfig, board, pacman, ghosts) {
     //#########################################################################
 
     this.points = 0;
-
     // Map
     // 0 - empty road
     // 1 - portal
@@ -55,6 +54,19 @@ function Controller (gameConfig, board, pacman, ghosts) {
         });
     }
 
+    function isGhostOnPath (path) {
+        var i, g;
+
+        for (i = 0; i<path.length; i++) {
+            for(g = 0; g < ghosts.length; g++) {
+                if (!ghosts[g].dead && path[i].x === ghosts[g].x && path[i].y === ghosts[g].y) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     function tick () {
 
         if (panickedTicksLeft) {
@@ -67,7 +79,18 @@ function Controller (gameConfig, board, pacman, ghosts) {
             panickedTicksLeft--;
         }
 
+        if ((pacman.path.length == 0 || isGhostOnPath(pacman.path)) && board.countDots() > 0) {
+            pacman.path = pathfinder.calculatePacmanPath(board.map, pacman, ghosts);
+        }
+
+        forEachGhost(function (ghost) {
+            if (ghost.path.length == 0) {
+                ghost.path = pathfinder.calculateGhostPath(board.map, ghost);
+            }
+        });
+
         moveAllCharacters();
+
 
         if (board.map[pacman.y][pacman.x] === 3) {
             board.map[pacman.y][pacman.x] = 0;
@@ -81,7 +104,7 @@ function Controller (gameConfig, board, pacman, ghosts) {
             this.points += 50;
 
             forEachGhost(function (ghost) {
-                ghost.die();
+                ghost.panic();
             });
 
             panickedTicksLeft = gameConfig.panickedTicks;

@@ -2,7 +2,8 @@
 // based on: http://www.briangrinstead.com/blog/astar-search-algorithm-in-javascript
 function Pathfinder() {
 
-    var astar = {};
+    var astar = {},
+        dotty = {};
 
     //#########################################################################
     // FUNCTIONS
@@ -16,7 +17,48 @@ function Pathfinder() {
         });
 
         return clone;
+    };
+
+    function findNextDestination (map) {
+        var dots = [], col, row;
+
+        for (col = 0; col < map[0].length; col++) {
+            for (row = 0; row < map.length; row++) {
+                if (map[row][col] === 3 || map[row][col] === 4) {
+                    dots.push({
+                        x : col,
+                        y : row
+                    })
+                }
+            }
+        }
+        if (dots.length) {
+            return dots[Math.floor(Math.random() * dots.length)];
+        }
+
+        return null;
     }
+
+    function findRandomDestination (map) {
+        var dots = [], col, row;
+
+        for (col = 0; col < map[0].length; col++) {
+            for (row = 0; row < map.length; row++) {
+                if (map[row][col] !== 9) {
+                    dots.push({
+                        x : col,
+                        y : row
+                    })
+                }
+            }
+        }
+        if (dots.length) {
+            return dots[Math.floor(Math.random() * dots.length)];
+        }
+
+        return null;
+    }
+
 
     //#########################################################################
     // A START PATH FINDING ALGORITHM
@@ -50,48 +92,24 @@ function Pathfinder() {
     // 9 - wall
     // 10 - ghost
     // 100 - pacman
-    astar._isUnreachable = function (node) {
+    astar._isPacmanUnreachable = function (node) {
         return node.value > 4;
     };
 
-    // Directions
-    // 0 - top
-    // 1 - right
-    // 2 - down
-    // 3 - left
-    astar._convertToPath = function (start, nodeList) {
-        var lastCol = start.x,
-            lastRow = start.y,
-            i,
-            path = [];
-
-        for (i = 0; i < nodeList.length; i++) {
-            if (lastCol < nodeList[i].x) {
-                // right
-                path.push(1);
-            }
-
-            if (lastCol > nodeList[i].x) {
-                // left
-                path.push(3);
-            }
-
-            if (lastRow < nodeList[i].y) {
-                // down
-                path.push(2);
-            }
-
-            if (lastRow > nodeList[i].y) {
-                // up
-                path.push(0);
-            }
-
-
-            lastCol = nodeList[i].x;
-            lastRow = nodeList[i].y;
+    astar._calculatePacmanPromotion = function (node) {
+        if (node.value === 3 || node.value === 4) {
+            return 1;
         }
 
-        return path;
+        return 1;
+    };
+
+    astar._isGhostUnreachable = function (node) {
+        return node.value === 9;
+    };
+
+    astar._calculateGhostPromotion = function (node) {
+        return 1;
     };
 
     astar.prepare = function (map) {
@@ -105,7 +123,6 @@ function Pathfinder() {
                     f : 0,
                     g : 0,
                     h : 0,
-                    debug : '',
                     parent : null
                 };
             }
@@ -114,7 +131,7 @@ function Pathfinder() {
         return map;
     };
 
-    astar.search = function (map, start, end) {
+    astar.calculatePath = function (map, start, end, unreachabmeFn, promotionFn) {
 
         var openList   = [];
         var closedList = [];
@@ -139,20 +156,20 @@ function Pathfinder() {
                     ret.push(curr);
                     curr = curr.parent;
                 }
-                return astar._convertToPath(start, ret.reverse());
+
+                return ret.reverse();
+
             }
 
             // Normal case -- move currentNode from open to closed, process each of its neighbors
             astar._removeNode(openList, currentNode);
-            // openList.removeGraphNode(currentNode);
 
             closedList.push(currentNode);
             var neighbors = astar.neighbors(map, currentNode);
 
             for(var i = 0; i < neighbors.length; i++) {
                 var neighbor = neighbors[i];
-                if (astar._containsNode(closedList, neighbor) || astar._isUnreachable(neighbor)) {
-                // if(closedList.findGraphNode(neighbor) || neighbor.isWall()) {
+                if (astar._containsNode(closedList, neighbor) || unreachabmeFn(neighbor)) {
                     // not a valid node to process, skip to next neighbor
                     continue;
                 }
@@ -164,12 +181,12 @@ function Pathfinder() {
 
 
                 if (!astar._containsNode(openList, neighbor)) {
-                // if(!openList.findGraphNode(neighbor)) {
-                    // This the the first time we have arrived at this node, it must be the best
+                    // This is the first time we have arrived at this node, it must be the best
                     // Also, we need to take the h (heuristic) score since we haven't done so yet
 
                     gScoreIsBest = true;
-                    neighbor.h = astar.heuristic(neighbor, end);
+                    // promote pathas that contain dots
+                    neighbor.h = astar.heuristic(neighbor, end) * promotionFn(neighbor);
                     openList.push(neighbor);
 
                 } else if (gScore < neighbor.g) {
@@ -183,7 +200,6 @@ function Pathfinder() {
                     neighbor.parent = currentNode;
                     neighbor.g = gScore;
                     neighbor.f = neighbor.g + neighbor.h;
-                    neighbor.debug = "F: " + neighbor.f + "<br />G: " + neighbor.g + "<br />H: " + neighbor.h;
                 }
             }
         }
@@ -210,10 +226,10 @@ function Pathfinder() {
         if(map[row+1] && map[row+1][col]) {
             ret.push(map[row+1][col]);
         }
-        if(map[row][col-1] && map[row][col-1]) {
+        if(map[row] && map[row][col-1]) {
             ret.push(map[row][col-1]);
         }
-        if(map[row][col+1] && map[row][col+1]) {
+        if(map[row] && map[row][col+1]) {
             ret.push(map[row][col+1]);
         }
         return ret;
@@ -233,15 +249,51 @@ function Pathfinder() {
     // 100 - pacman
 
     this.calculatePacmanPath = function (map, pacman, ghosts) {
-        var _map = cloneMap(map);
+        var nodeList = [],
+            dot;
+
+        map = cloneMap(map),
 
         ghosts.forEach(function (ghost) {
-            _map[ghost.y][ghost.x] = 10;
+            if (!ghost.dead) {
+                map[ghost.y][ghost.x] = 10;
+            }
         });
 
-        _map = astar.prepare(_map);
+        dot = findNextDestination(map);
+        if (dot) {
+            astar.prepare(map);
+            nodeList = astar.calculatePath(
+                map,
+                map[pacman.targetY][pacman.targetX],
+                map[dot.y][dot.x],
+                astar._isPacmanUnreachable,
+                astar._calculatePacmanPromotion
+            );
+        }
 
-        return astar.search(_map, _map[pacman.y][pacman.x], _map[1][1]);
+        return nodeList;
     };
+
+    this.calculateGhostPath = function (map, ghost) {
+        var nodeList = [],
+            dot;
+
+        map = cloneMap(map),
+
+        dot = findRandomDestination(map);
+        if (dot) {
+            astar.prepare(map);
+            nodeList = astar.calculatePath(
+                map,
+                map[ghost.targetY][ghost.targetX],
+                map[dot.y][dot.x],
+                astar._isGhostUnreachable,
+                astar._calculateGhostPromotion
+            );
+        }
+
+        return nodeList;
+    }
 
 }

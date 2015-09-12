@@ -8,10 +8,7 @@ function Pacman (gameConfig, characterConfig) {
     var areaSize = gameConfig.areaSize,
         canvasContext = gameConfig.canvasContext,
 
-        // helper saves last direction for drawing
-        // drawing pacman arc is determined by direction
-        // if there is no more path and direction would be undefined
-        // there would be an error drawing character
+        // current diretion calculated based on current and target position
         _direction,
 
         // current coordinates
@@ -26,10 +23,6 @@ function Pacman (gameConfig, characterConfig) {
         _speedX,
         _speedY,
 
-        // target area
-        targetX,
-        targetY,
-
         // mouth opening
         omnomnom = 0;
 
@@ -40,17 +33,11 @@ function Pacman (gameConfig, characterConfig) {
     this.color = '#FE0';
     this.speed = characterConfig.speed;
 
-    this.x = targetX = characterConfig.x;
-    this.y = targetY = characterConfig.y;
+    this.x = this.targetX = characterConfig.x;
+    this.y = this.targetY = characterConfig.y;
 
-    // Directions
-    // 0 - top
-    // 1 - right
-    // 2 - down
-    // 3 - left
-    this.direction = 1,
-
-    this.path = [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,1,1,1,1,2,2,2];
+    // array ob {x, y} objects
+    this.path = [];
 
     //#########################################################################
     // FUNCTIONS
@@ -61,8 +48,14 @@ function Pacman (gameConfig, characterConfig) {
     //#########################################################################
 
     this.init = function () {
+        // Directions
+        // 0 - top
+        // 1 - right
+        // 2 - down
+        // 3 - left
+
         // init direction is right
-        _direction = this.direction;
+        _direction = 1
 
         _speedX = this.speed;
         _speedY = 0;
@@ -93,6 +86,7 @@ function Pacman (gameConfig, characterConfig) {
     };
 
     this.move = function () {
+        var newTarget;
 
         omnomnom += 0.02;
 
@@ -112,40 +106,53 @@ function Pacman (gameConfig, characterConfig) {
 
 
         } else {
-            this.x = targetX;
-            this.y = targetY;
+            this.x = this.targetX;
+            this.y = this.targetY;
 
-            this.direction = this.path.shift();
+            newTarget = this.path.shift();
 
             // no way to go?
-            if (this.direction === undefined) return;
+            if (newTarget === undefined) return;
 
-            _direction = this.direction;
+            this.targetX = newTarget.x;
+            this.targetY = newTarget.y;
 
-            switch (this.direction) {
-                case 0 :
-                    targetY--;
-                    _speedY = -this.speed;
-                    _speedX = 0;
-                    break;
-                case 1 :
-                    targetX++;
-                    _speedX = this.speed;
-                    _speedY = 0;
-                    break;
-                case 2 :
-                    targetY++;
-                    _speedY = this.speed;
-                    _speedX = 0;
-                    break;
-                case 3 :
-                    targetX--;
-                    _speedX = -this.speed;
-                    _speedY = 0;
+            // Directions
+            // 0 - top
+            // 1 - right
+            // 2 - down
+            // 3 - left
+
+            if (this.targetX > this.x) {
+                // right
+                _direction = 1;
+                _speedX = this.speed;
+                _speedY = 0;
             }
 
-            _targetX = targetX * areaSize + areaSize / 2;
-            _targetY = targetY * areaSize + areaSize / 2;
+            if (this.targetX < this.x) {
+                // left
+                _direction = 3;
+                _speedX = -this.speed;
+                _speedY = 0;
+            }
+
+            if (this.targetY > this.y) {
+                // down
+                _direction = 2;
+                _speedY = this.speed;
+                _speedX = 0;
+            }
+
+            if (this.targetY < this.y) {
+                // up
+                _direction = 0;
+                _speedY = -this.speed;
+                _speedX = 0;
+            }
+
+            _targetX = this.targetX * areaSize + areaSize / 2;
+            _targetY = this.targetY * areaSize + areaSize / 2;
         }
     };
 

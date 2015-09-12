@@ -156,6 +156,7 @@ function Board (gameConfig) {
         }
     };
 
+    // draw area and all its neighbours
     this.drawSurrounding = function (col, row) {
         var tmpC = [col], tmpR = [row], c, r;
 

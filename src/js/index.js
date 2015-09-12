@@ -17,25 +17,25 @@ function Game () {
 
         pacman = new Pacman(
             config,
-            { x :14, y : 23 , speed: 0.7},
+            { x :14, y : 23 , speed: 1},
             board
         ),
 
         blinky = new Ghost(
             config,
-            { x :14, y : 11, color : '#F00', selected : 1 }
+            { x :14, y : 11, color : '#F00', selected : 1, speed: 0.5 }
         ),
         pinky = new Ghost(
             config,
-            { x : 14, y : 13, color : '#F99' }
+            { x : 14, y : 13, color : '#F99', speed: 0.5 }
         ),
         inky = new Ghost(
             config,
-            { x : 12, y : 13, color : '#6FF' }
+            { x : 12, y : 13, color : '#6FF', speed: 0.5 }
         ),
         clyde = new Ghost(
             config,
-            { x : 16, y : 13, color : '#FA0' }
+            { x : 16, y : 13, color : '#FA0', speed: 0.5 }
         ),
 
         pathfinder = new Pathfinder(),
@@ -43,16 +43,13 @@ function Game () {
         controller = new Controller(
             config,
             board,
+            pathfinder,
             pacman,
             [blinky, pinky, inky, clyde]
         );
 
         canvas.width = config.areaSize * board.cols;
         canvas.height = config.areaSize * board.rows;
-
-        var pacmanPath = pathfinder.calculatePacmanPath(board.map, pacman, [blinky, pinky, inky, clyde]);
-        pacman.path = pacmanPath;
-
 
         controller.start();
 }
