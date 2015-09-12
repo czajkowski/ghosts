@@ -7,9 +7,10 @@ function Game () {
     var canvas = document.querySelector('canvas'),
         config = {
             tickTime : 10,
-            panickedTicks : 100,
+            panickedTicks : 1000,
             deadTicks : 100,
             areaSize : 20,
+            footerHeight : 50,
             ctx : canvas.getContext('2d')
         },
 
@@ -17,25 +18,25 @@ function Game () {
 
         cakeman = new Cakeman(
             config,
-            { x :14, y : 23 , speed: 1},
+            { x :14, y : 23 , speed: 1.5},
             board
         ),
 
-        blinky = new Ghost(
+        ghost1 = new Ghost(
             config,
-            { x :14, y : 11, color : '#F00', selected : 1, speed: 0.5 }
+            { id : 1, x :14, y : 11, color : '#F00', speed: 0.2 }
         ),
-        pinky = new Ghost(
+        ghost2 = new Ghost(
             config,
-            { x : 14, y : 13, color : '#F99', speed: 0.5 }
+            { id : 2, x : 14, y : 13, color : '#F99', speed: 0.5 }
         ),
-        inky = new Ghost(
+        ghost3 = new Ghost(
             config,
-            { x : 12, y : 13, color : '#6FF', speed: 0.5 }
+            { id : 3, x : 12, y : 13, color : '#6FF', speed: 0.5 }
         ),
-        clyde = new Ghost(
+        ghost4 = new Ghost(
             config,
-            { x : 16, y : 13, color : '#FA0', speed: 0.5 }
+            { id : 4, x : 16, y : 13, color : '#FA0', speed: 0.5 }
         ),
 
         pathfinder = new Pathfinder(),
@@ -45,11 +46,11 @@ function Game () {
             board,
             pathfinder,
             cakeman,
-            [blinky, pinky, inky, clyde]
+            [ghost1, ghost2, ghost3, ghost4]
         );
 
         canvas.width = config.areaSize * board.cols;
-        canvas.height = config.areaSize * board.rows;
+        canvas.height = config.areaSize * board.rows + config.footerHeight;
 
         controller.start();
 }

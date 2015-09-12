@@ -13,6 +13,19 @@ function Ghost (gameConfig, characterConfig) {
     // Am I dead?
     this.dead = false;
 
+    //#########################################################################
+    // HELPER FUNCTIONS
+    //#########################################################################
+
+    function toHex(c) {
+        return ("0" + c.toString(16)).slice(-2);
+    }
+
+    function rgbToHex(r, g, b) {
+        return "#" + toHex(r) + toHex(g) + toHex(b);
+    }
+
+
     // Ghost speed is multiplied when dead
     this.getXSpeed = function () {
         return Character.prototype.getXSpeed.call(this) * (this.dead ? 5 : 1);
@@ -25,6 +38,7 @@ function Ghost (gameConfig, characterConfig) {
     this.draw = function () {
         var x = this._x,
             y = this._y,
+            hexPart,
 
             // Helpers to posotion eye puppils.
             // Depending on current direction. puppils should point ahead.
@@ -36,11 +50,13 @@ function Ghost (gameConfig, characterConfig) {
         // When ghost selected. draw ligher background to mark it on
         // the board.
         if (this.selected && !this.panicked && !this.dead) {
-            gameConfig.ctx.fillStyle = '#AAA';
+            // Calc background color for blinking effect.
+            hexPart = (this.moveCounter % 50) * 3 + 50;
+            gameConfig.ctx.fillStyle = rgbToHex(hexPart, hexPart, hexPart);
             gameConfig.ctx.beginPath();
-            gameConfig.ctx.lineTo(x + gameConfig.areaSize / 1.6, y + gameConfig.areaSize / 1.6);
-            gameConfig.ctx.lineTo(x - gameConfig.areaSize / 1.6, y + gameConfig.areaSize / 1.6);
-            gameConfig.ctx.arc(x, y, gameConfig.areaSize / 1.6, -Math.PI, 0);
+            gameConfig.ctx.lineTo(x + gameConfig.areaSize / 1.5, y + gameConfig.areaSize / 1.5);
+            gameConfig.ctx.lineTo(x - gameConfig.areaSize / 1.5, y + gameConfig.areaSize / 1.5);
+            gameConfig.ctx.arc(x, y, gameConfig.areaSize / 1.5, -Math.PI, 0);
             gameConfig.ctx.closePath();
             gameConfig.ctx.fill();
         }
@@ -99,6 +115,19 @@ function Ghost (gameConfig, characterConfig) {
         gameConfig.ctx.fill();
     };
 
+    //#########################################################################
+    // EVENT HANDLERS
+    //#########################################################################
+
+    helpers.addEventListener(document, "keypress", (function (e) {
+        var code = e.which || e.keyCode;
+
+        if (code === 48 + characterConfig.id) {
+            this.selected = true;
+        } else {
+            this.selected = false;
+        }
+    }).bind(this));
 
 }
 

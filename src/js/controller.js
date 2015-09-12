@@ -84,6 +84,36 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
     // METHODS
     //#########################################################################
 
+    this.addPoints = function (add) {
+        this.points += add;
+        this.drawPoints();
+    };
+
+    this.drawFooter = function () {
+        gameConfig.ctx.fillStyle = '#000';
+        gameConfig.ctx.fillRect(
+            0,
+            board.rows * gameConfig.areaSize,
+            board.cols * gameConfig.areaSize,
+            gameConfig.footerHeight);
+    };
+
+    this.drawPoints = function () {
+        gameConfig.ctx.fillStyle = '#000';
+        gameConfig.ctx.fillRect(
+            0,
+            board.rows * gameConfig.areaSize + 10,
+            board.cols / 2 * gameConfig.areaSize,
+            gameConfig.footerHeight);
+
+        gameConfig.ctx.fillStyle = '#AAA';
+        gameConfig.ctx.font="16px 'Lucida Console'";
+        gameConfig.ctx.fillText("POINTS: " + this.points,
+            10,
+            board.rows * gameConfig.areaSize + 30
+        );
+    };
+
     this.tick = function () {
         var ghost;
 
@@ -101,7 +131,7 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
         }
 
         // Calculate main character path
-        if ((cakeman.path.length === 0 ) && board.countDots() > 0) {
+        if ((cakeman.path.length === 0 || isGhostOnPath(cakeman.path)) && board.countDots() > 0) {
             cakeman.path = pathfinder.calculateCakemanPath(board.map, cakeman, ghosts);
         }
 
@@ -124,9 +154,10 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
         if (ghost) {
             if (ghost.panicked) {
                 ghost.dead = true;
-
                 // Galculate ghost path to shelter.
                 ghost.path = pathfinder.calculatePath(board.map, ghost, board.  ghostShelter);
+
+                this.addPoints(200);
 
             } else {
                 // Living ghost!
@@ -136,12 +167,12 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
 
         if (board.isSmallDot(cakeman.x, cakeman.y)) {
             board.clearArea(cakeman.x, cakeman.y);
-            this.points += 10;
+            this.addPoints(10);
         }
 
         if (board.isBigDot(cakeman.x, cakeman.y)) {
             board.clearArea(cakeman.x, cakeman.y);
-            this.points += 50;
+            this.addPoints(50);
 
             eachGhost(function (ghost) {
                 ghost.panicked = true;
@@ -152,11 +183,12 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
         }
 
         drawCharacters();
-
     };
 
     this.start = function () {
         board.draw();
+        this.drawFooter();
+        this.drawPoints();
 
         eachCharacter(function (character) {
             character.init();

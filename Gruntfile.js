@@ -58,6 +58,7 @@ module.exports = function(grunt) {
             },
             "build-js": {
                 src: [
+                    "src/js/helpers.js",
                     "src/js/board.js",
                     "src/js/pathfinder.js",
                     "src/js/character.js",
