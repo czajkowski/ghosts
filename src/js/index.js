@@ -81,6 +81,7 @@ function Game () {
         config.ctx.font = '14px "Lucida Console"';
         config.ctx.fillText('Keys 1-4 : choose ghost', config.mapCols * config.areaSize / 2, canvas.height / 2 + 60);
         config.ctx.fillText('Arrows   : move ghost  ', config.mapCols * config.areaSize / 2, canvas.height / 2 + 80);
+        config.ctx.fillText('Catch the yellow guy!  ', config.mapCols * config.areaSize / 2, canvas.height / 2 + 100);
 
         config.ctx.fillStyle = '#FFF';
         config.ctx.font = '16px "Lucida Console"';
