@@ -280,24 +280,6 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
 
         moveCharacters();
 
-        ghost = getGhostInArea(cakeman.x, cakeman.y);
-        if (ghost) {
-            if (ghost.panicked) {
-                ghost.dead = true;
-                // Galculate ghost path to shelter.
-                ghost.path = pathfinder.calculatePath(board.map, ghost, board.  ghostShelter);
-
-                this.addPoints(200);
-
-            } else {
-                // Living ghost encountered.
-                this.stop();
-
-                // Game won!
-                successCallback();
-            }
-        }
-
         if (board.isSmallDot(cakeman.x, cakeman.y)) {
             board.clearArea(cakeman.x, cakeman.y);
             this.addPoints(10);
@@ -317,8 +299,27 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
 
         drawCharacters();
 
+        ghost = getGhostInArea(cakeman.x, cakeman.y);
+        if (ghost) {
+            if (ghost.panicked) {
+                ghost.dead = true;
+                // Galculate ghost path to shelter.
+                ghost.path = pathfinder.calculatePath(board.map, ghost, board.  ghostShelter);
+
+                this.addPoints(200);
+
+            } else {
+                // Living ghost encountered.
+                this.stop();
+
+                // Game won!
+                successCallback();
+            }
+        }
+
         if (board.countDots() === 0) {
             // Game lost!
+            this.stop();
             failureCallback();
         }
     };
