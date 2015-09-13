@@ -1,5 +1,3 @@
-/* jshint ignore:start */
-
 
 Map = {
     EMPTY : 0,

@@ -1,6 +1,5 @@
-/* jshint ignore:start */
 function Board (gameConfig) {
-
+    'use strict';
 
     //#########################################################################
     // PROPERTIES
@@ -138,7 +137,7 @@ function Board (gameConfig) {
                 fn(col, row);
             }
         }
-    }
+    };
 
     // Draw map area
     this.drawArea = function (col, row) {
@@ -149,10 +148,10 @@ function Board (gameConfig) {
         gameConfig.ctx.fillRect(col * gameConfig.areaSize, row * gameConfig.areaSize, gameConfig.areaSize, gameConfig.areaSize);
 
         // Check if coresponding elements are solid
-        top = row == 0 ? 0 : this.map[row - 1][col] > Map.BIG_DOT;
-        right = col == this.cols - 1 ? 0 : this.map[row][col + 1] > Map.BIG_DOT;
-        bottom = row == this.rows - 1 ? 0 : this.map[row + 1][col] > Map.BIG_DOT;
-        left = col == 0 ? 0 : this.map[row][col - 1] > Map.BIG_DOT;
+        top = row === 0 ? 0 : this.map[row - 1][col] > Map.BIG_DOT;
+        right = col === this.cols - 1 ? 0 : this.map[row][col + 1] > Map.BIG_DOT;
+        bottom = row === this.rows - 1 ? 0 : this.map[row + 1][col] > Map.BIG_DOT;
+        left = col === 0 ? 0 : this.map[row][col - 1] > Map.BIG_DOT;
 
         switch (this.map[row][col]) {
             case 9 :
@@ -247,9 +246,9 @@ function Board (gameConfig) {
             x = this.cols / 2 * gameConfig.areaSize + gameConfig.areaSize * 3 * i;
             y = this.rows * gameConfig.areaSize + 30;
 
-            gameConfig.ctx.textAlign = "left";
+            gameConfig.ctx.textAlign = 'left';
             gameConfig.ctx.fillStyle = '#AAA';
-            gameConfig.ctx.font="16px 'Lucida Console'";
+            gameConfig.ctx.font = '16px "Lucida Console"';
             gameConfig.ctx.fillText(i + 1, x, y);
 
             ghosts[i].draw.call({
@@ -257,12 +256,12 @@ function Board (gameConfig) {
                 _y : y - 7,
                 color : ghosts[i].color,
                 direction: Direction.LEFT
-            })
+            });
         }
     };
 
     this.drawPoints = function (points) {
-        gameConfig.ctx.textAlign = "left";
+        gameConfig.ctx.textAlign = 'left';
         gameConfig.ctx.fillStyle = '#000';
         gameConfig.ctx.fillRect(
             0,
@@ -271,8 +270,8 @@ function Board (gameConfig) {
             gameConfig.footerHeight);
 
         gameConfig.ctx.fillStyle = '#AAA';
-        gameConfig.ctx.font="16px 'Lucida Console'";
-        gameConfig.ctx.fillText("POINTS: " + points,
+        gameConfig.ctx.font = '16px "Lucida Console"';
+        gameConfig.ctx.fillText('POINTS: ' + points,
             10,
             this.rows * gameConfig.areaSize + 30
         );

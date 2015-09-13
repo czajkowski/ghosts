@@ -1,5 +1,6 @@
-/* jshint ignore:start */
 function Ghost (gameConfig, characterConfig) {
+    'use strict';
+
     Character.apply(this, arguments);
 
     this.color = characterConfig.color;
@@ -18,11 +19,11 @@ function Ghost (gameConfig, characterConfig) {
     //#########################################################################
 
     function toHex(c) {
-        return ("0" + c.toString(16)).slice(-2);
+        return ('0' + c.toString(16)).slice(-2);
     }
 
     function rgbToHex(r, g, b) {
-        return "#" + toHex(r) + toHex(g) + toHex(b);
+        return '#' + toHex(r) + toHex(g) + toHex(b);
     }
 
 
@@ -40,14 +41,13 @@ function Ghost (gameConfig, characterConfig) {
             y = this._y,
             hexPart,
 
-            // Helpers to posotion eye puppils.
-            // Depending on current direction. puppils should point ahead.
-            // Positioners help with calculating x/y position
-            // when drawing.
+            // Helpers to position eye pupils.
+            // Depending on current direction. pupils should point ahead.
+            // Positioners help with calculating x/y when drawing.
             horizontalPositioner = [0, 1, 0, -1],
             verticalPositioner = [-1, 0, 1, 0];
 
-        // When ghost selected. draw ligher background to mark it on
+        // When ghost selected draw background to mark it on
         // the board.
         if (this.selected && !this.dead) {
             // Calc background color for blinking effect.

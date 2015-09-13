@@ -1,8 +1,8 @@
-/* jshint ignore:start */
 function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
+    'use strict';
 
     //#########################################################################
-    // VARIABLED
+    // VARIABLES
     //#########################################################################
 
     var mainInterval,
@@ -16,13 +16,15 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
         var code = e.which || e.keyCode,
             ghostId;
 
-        // Ghost select
+        // Select ghost
         if (code > 48 && code <= 48 + ghosts.length) {
             ghostId = code - 48 - 1;
 
             if (ghosts[ghostId] !== selectedGhost) {
-                selectedGhost && (selectedGhost.selected = false);
-                selectedGhost = ghosts[ghostId]
+                if (selectedGhost) {
+                    selectedGhost.selected = false;
+                }
+                selectedGhost = ghosts[ghostId];
                 selectedGhost.selected = true;
                 selectedGhost.path = [];
             }
@@ -162,21 +164,21 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
     // HELPER FUNCTIONS
     //#########################################################################
 
-    // Helper method execiting passed function
+    // Helper executing passed function
     // for each ghost.
     function eachGhost (fn) {
-        ghosts.forEach(fn)
+        ghosts.forEach(fn);
     }
 
-    // Helper method execiting passed function
+    // Helper executing passed function
     // for each character.
     function eachCharacter (fn) {
         eachGhost(fn);
         fn(cakeman);
     }
 
-    // Moves each character and cleares area
-    // he was previously on.
+    // Moves each character and clears area
+    // it was previously on.
     function moveCharacters () {
         eachCharacter(function (character) {
             character.move();
@@ -191,7 +193,7 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
         });
     }
 
-    // Reeturns a living ahos if it is in the area
+    // Returns a living ghost if it is in the area
     function getGhostInArea (col, row) {
         var g;
 
@@ -326,13 +328,8 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
         failureCallback = onFailure;
 
         board.drawMap();
-
         board.drawFooter(ghosts);
         board.drawPoints(this.points);
-
-        // Use ghost drawing methods to draw ghosts on footer
-        eachGhost(function (ghost, index) {
-        });
 
         eachCharacter(function (character) {
             character.init();
@@ -340,12 +337,12 @@ function Controller (gameConfig, board, pathfinder, cakeman, ghosts) {
 
         mainInterval = setInterval(this.tick.bind(this), gameConfig.tickTime);
 
-        document.addEventListener("keydown", eventHandler);
+        document.addEventListener('keydown', eventHandler);
     };
 
     this.stop = function () {
         clearInterval(mainInterval);
-        document.removeEventListener("keydown", eventHandler);
+        document.removeEventListener('keydown', eventHandler);
     };
 
 

@@ -1,5 +1,6 @@
-/* jshint ignore:start */
 function Cakeman (gameConfig, characterConfig) {
+    'use strict';
+
     Character.apply(this, arguments);
 
     this.color = '#FE0';

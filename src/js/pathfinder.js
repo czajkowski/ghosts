@@ -1,37 +1,46 @@
-/* jshint ignore:start */
 // based on: http://www.briangrinstead.com/blog/astar-search-algorithm-in-javascript
 function Pathfinder() {
+    'use strict';
 
-    var astar = {},
-        dotty = {};
+    var astar = {};
 
     //#########################################################################
     // FUNCTIONS
     //#########################################################################
 
     function cloneMap (map) {
-        var clone = [], i;
+        var clone = [];
 
         map.forEach(function (col) {
             clone.push(col.slice(0));
         });
 
         return clone;
-    };
+    }
 
-    function findNextDestination (map) {
-        var dots = [], col, row;
+    function findAreas (map, predicate) {
+        var col, row, areas = [];
 
         for (col = 0; col < map[0].length; col++) {
             for (row = 0; row < map.length; row++) {
-                if (map[row][col] === Map.DOT || map[row][col] === Map.BIG_DOT) {
-                    dots.push({
+                if (predicate(map[row][col])) {
+                    areas.push({
                         x : col,
                         y : row
-                    })
+                    });
                 }
             }
         }
+
+        return areas;
+    }
+
+    function findNextDestination (map) {
+        var dots = findAreas(map, function (val) {
+            return val === Map.DOT || val === Map.BIG_DOT;
+        });
+
+        // Select random dot
         if (dots.length) {
             return dots[Math.floor(Math.random() * dots.length)];
         }
@@ -40,20 +49,13 @@ function Pathfinder() {
     }
 
     function findRandomDestination (map) {
-        var dots = [], col, row;
+        var areas = findAreas(map, function (val) {
+            return val !== Map.WALL;
+        });
 
-        for (col = 0; col < map[0].length; col++) {
-            for (row = 0; row < map.length; row++) {
-                if (map[row][col] !== Map.WALL) {
-                    dots.push({
-                        x : col,
-                        y : row
-                    })
-                }
-            }
-        }
-        if (dots.length) {
-            return dots[Math.floor(Math.random() * dots.length)];
+        // Select random area
+        if (areas.length) {
+            return areas[Math.floor(Math.random() * areas.length)];
         }
 
         return null;
@@ -125,42 +127,47 @@ function Pathfinder() {
 
     astar.calculatePath = function (map, start, end, unreachabmeFn, promotionFn) {
 
-        var openList   = [];
-        var closedList = [];
+        var openList   = [],
+            closedList = [],
+            lowInd,
+            currentNode,
+            i,
+            curr,
+            ret,
+            neighbors,
+            neighbor,
+            gScore,
+            gScoreIsBest;
+
         openList.push(start);
 
         while(openList.length > 0) {
-
-            // Grab the lowest f(x) to process next
-            var lowInd = 0;
-            for(var i = 0; i < openList.length; i++) {
+            lowInd = 0;
+            for(i = 0; i < openList.length; i++) {
                 if (openList[i].f < openList[lowInd].f) {
                     lowInd = i;
                 }
             }
-            var currentNode = openList[lowInd];
+            currentNode = openList[lowInd];
 
             // End case -- result has been found, return the traced path
             if(currentNode.x === end.x && currentNode.y === end.y) {
-                var curr = currentNode;
-                var ret = [];
+                curr = currentNode;
+                ret = [];
                 while(curr.parent) {
                     ret.push(curr);
                     curr = curr.parent;
                 }
-
                 return ret.reverse();
-
             }
 
             // Normal case -- move currentNode from open to closed, process each of its neighbors
             astar._removeNode(openList, currentNode);
-
             closedList.push(currentNode);
-            var neighbors = astar.neighbors(map, currentNode);
+            neighbors = astar.neighbors(map, currentNode);
 
-            for(var i = 0; i < neighbors.length; i++) {
-                var neighbor = neighbors[i];
+            for(i = 0; i < neighbors.length; i++) {
+                neighbor = neighbors[i];
                 if (astar._containsNode(closedList, neighbor) || unreachabmeFn(neighbor)) {
                     // not a valid node to process, skip to next neighbor
                     continue;
@@ -168,8 +175,8 @@ function Pathfinder() {
 
                 // g score is the shortest distance from start to current node, we need to check if
                 //   the path we have arrived at this neighbor is the shortest one we have seen yet
-                var gScore = currentNode.g + 1; // 1 is the distance from a node to it's neighbor
-                var gScoreIsBest = false;
+                gScore = currentNode.g + 1; // 1 is the distance from a node to it's neighbor
+                gScoreIsBest = false;
 
 
                 if (!astar._containsNode(openList, neighbor)) {
@@ -202,15 +209,13 @@ function Pathfinder() {
 
     astar.heuristic = function(nodeA, nodeB) {
         // Manhattan distance
-        var d1 = Math.abs (nodeB.x - nodeA.x);
-        var d2 = Math.abs (nodeB.y - nodeA.y);
-        return d1 + d2;
-    },
+        return Math.abs (nodeB.x - nodeA.x) + Math.abs (nodeB.y - nodeA.y);
+    };
 
     astar.neighbors = function(map, node) {
-        var ret = [];
-        var row = node.y;
-        var col = node.x;
+        var ret = [],
+            row = node.y,
+            col = node.x;
 
         if(map[row-1] && map[row-1][col]) {
             ret.push(map[row-1][col]);
@@ -225,7 +230,7 @@ function Pathfinder() {
             ret.push(map[row][col+1]);
         }
         return ret;
-    }
+    };
 
     //#########################################################################
     // METHODS
@@ -237,6 +242,7 @@ function Pathfinder() {
 
         map = cloneMap(map),
 
+        // Mark ghosts on map
         ghosts.forEach(function (ghost) {
             if (!ghost.dead) {
                 map[ghost.y][ghost.x] = Map.GHOST;
@@ -244,6 +250,7 @@ function Pathfinder() {
         });
 
         dot = findNextDestination(map);
+
         if (dot) {
             astar.prepare(map);
             nodeList = astar.calculatePath(
@@ -262,8 +269,7 @@ function Pathfinder() {
         var nodeList = [],
             dot;
 
-        map = cloneMap(map),
-
+        map = cloneMap(map);
         dot = findRandomDestination(map);
         if (dot) {
             astar.prepare(map);
@@ -282,7 +288,7 @@ function Pathfinder() {
     this.calculatePath = function (map, target, destination) {
         var nodeList = [];
 
-        map = cloneMap(map),
+        map = cloneMap(map);
         astar.prepare(map);
         nodeList = astar.calculatePath(
             map,

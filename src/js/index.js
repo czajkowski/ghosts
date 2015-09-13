@@ -1,10 +1,7 @@
-/* jshint ignore:start */
-
-// Characters
-// - max speed is 1
-
 function Game () {
-    var canvas = document.querySelector('canvas');
+    'use strict';
+
+    var canvas = document.querySelector('canvas'),
         config = {
             tickTime : 10,
             panickedTicks : 1000,
@@ -20,7 +17,7 @@ function Game () {
             var code = e.which || e.keyCode;
 
             if (code === 13) {
-                document.removeEventListener("keypress", startEventHandler);
+                document.removeEventListener('keypress', startEventHandler);
                 this.start();
             }
         }).bind(this);
@@ -47,8 +44,8 @@ function Game () {
         );
 
         config.ctx.fillStyle = '#AAA';
-        config.ctx.font="32px 'Lucida Console'";
-        config.ctx.textAlign = "center";
+        config.ctx.font = '32px "Lucida Console"';
+        config.ctx.textAlign = 'center';
         config.ctx.fillText(
             text,
             config.mapCols * config.areaSize / 2,
@@ -56,9 +53,9 @@ function Game () {
         );
 
         config.ctx.fillStyle = '#FFF';
-        config.ctx.font="16px 'Lucida Console'";
+        config.ctx.font = '16px "Lucida Console"';
         config.ctx.fillText(
-            "PRESS ENTER KEY TO PLAY AGAIN",
+            'PRESS ENTER KEY TO PLAY AGAIN',
             config.mapCols * config.areaSize / 2,
             config.mapRows * config.areaSize / 3 + 3 * config.areaSize + 30
         );
@@ -74,22 +71,22 @@ function Game () {
         );
 
         config.ctx.fillStyle = '#AAA';
-        config.ctx.font="50px 'Lucida Console'";
-        config.ctx.textAlign = "center";
-        config.ctx.fillText("G H O S T S", config.mapCols * config.areaSize / 2, canvas.height / 3);
+        config.ctx.font = '50px "Lucida Console"';
+        config.ctx.textAlign = 'center';
+        config.ctx.fillText('G H O S T S', config.mapCols * config.areaSize / 2, canvas.height / 3);
 
 
 
         config.ctx.fillStyle = '#555';
-        config.ctx.font="14px 'Lucida Console'";
-        config.ctx.fillText("Keys 1-4 : choose character", config.mapCols * config.areaSize / 2, canvas.height / 2 + 60);
-        config.ctx.fillText("Arrows   : move character  ", config.mapCols * config.areaSize / 2, canvas.height / 2 + 80);
+        config.ctx.font = '14px "Lucida Console"';
+        config.ctx.fillText('Keys 1-4 : choose ghost', config.mapCols * config.areaSize / 2, canvas.height / 2 + 60);
+        config.ctx.fillText('Arrows   : move ghost  ', config.mapCols * config.areaSize / 2, canvas.height / 2 + 80);
 
         config.ctx.fillStyle = '#FFF';
-        config.ctx.font="16px 'Lucida Console'";
-        config.ctx.fillText("PRESS ENTER KEY TO START", config.mapCols * config.areaSize / 2, canvas.height / 2  + 140);
+        config.ctx.font = '16px "Lucida Console"';
+        config.ctx.fillText('PRESS ENTER KEY TO START', config.mapCols * config.areaSize / 2, canvas.height / 2  + 140);
 
-        document.addEventListener("keypress", startEventHandler);
+        document.addEventListener('keypress', startEventHandler);
     };
 
     this.start = function () {
@@ -129,14 +126,14 @@ function Game () {
     };
 
     this.won = function () {
-        showWindow("YOU WIN!");
-        document.addEventListener("keypress", startEventHandler);
-    }
+        showWindow('YOU WIN!');
+        document.addEventListener('keypress', startEventHandler);
+    };
 
     this.lost = function () {
-        showWindow("YOU LOSE!");
-        document.addEventListener("keypress", startEventHandler);
-    }
+        showWindow('YOU LOSE!');
+        document.addEventListener('keypress', startEventHandler);
+    };
 
     this.showStartScreen();
 }

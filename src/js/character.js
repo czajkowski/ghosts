@@ -1,5 +1,5 @@
-/* jshint ignore:start */
 function Character (gameConfig, characterConfig) {
+    'use strict';
 
     // Current character diretion calculated based on current and target position.
     // Used to position characer when drawing.
@@ -15,12 +15,12 @@ function Character (gameConfig, characterConfig) {
     // One without _ represent area coordinates.
 
     // Current character position.
-    this._x;
-    this._y;
+    this._x = 0;
+    this._y = 0;
 
     // Target character position.
-    this._targetX;
-    this._targetY;
+    this._targetX = 0;
+    this._targetY = 0;
 
     this.moveCounter = 0;
 
@@ -59,7 +59,7 @@ function Character (gameConfig, characterConfig) {
         this.draw();
     };
 
-    this.draw = function () {}
+    this.draw = function () {};
 
     this.move = function () {
         var newTarget;
@@ -68,10 +68,10 @@ function Character (gameConfig, characterConfig) {
 
         if (this._x != this._targetX || this._y != this._targetY) {
             // Target not reached yet.
-            // Move current charcet position in the direction it is heading
+            // Move current character position in the direction it is heading
             // based on current direction speed.
 
-            // Math[min/max] used to make sure characted didn't moved past
+            // Math[min/max] used to make sure character didn't moved past
             // the target.
             this._x = Math[this._targetX < this._x ? 'max' : 'min'](this._targetX, this._x + this.getXSpeed());
             this._y = Math[this._targetY < this._y ? 'max' : 'min'](this._targetY, this._y + this.getYSpeed());
@@ -82,9 +82,8 @@ function Character (gameConfig, characterConfig) {
             this.x = this.targetX;
             this.y = this.targetY;
 
-            // Get new target adrea from current path.
+            // Get new target area from current path.
             newTarget = this.path.shift();
-
 
             // No way to go?
             if (newTarget === undefined) return;
@@ -92,8 +91,7 @@ function Character (gameConfig, characterConfig) {
             this.targetX = newTarget.x;
             this.targetY = newTarget.y;
 
-            // Set movement parameters based on
-            // new direction.
+            // Set new direction.
 
             // Right
             if (this.targetX > this.x) {
@@ -124,11 +122,13 @@ function Character (gameConfig, characterConfig) {
 }
 
 Character.prototype.getXSpeed = function () {
+    'use strict';
     var multipliers = [0, 1, 0, -1];
     return this.speed * multipliers[this.direction];
 };
 
 Character.prototype.getYSpeed = function () {
+    'use strict';
     var multipliers = [-1, 0, 1, 0];
     return this.speed * multipliers[this.direction];
 };
